@@ -7,8 +7,9 @@ import { LogLevelDesc, Logger, LoggerProvider, Servers } from "@hyperledger/cact
 import { ApiServer, AuthorizationProtocol, ConfigService, ICactusApiServerOptions } from "@hyperledger/cactus-cmd-api-server";
 import { Configuration, DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
-import { HealthCareAppDummyInfrastructure } from "./infrastructure/infrastructure";
+import { HealthCareAppDummyInfrastructure, org1Env } from "./infrastructure/infrastructure";
 import CryptoMaterial from "../../crypto-material/crypto-material.json";
+import { HealthCareCactusPlugin } from "../../../../healthcare-bussiness-logic-plugin/src/main/typescript/business-logic-plugin/healthcare-cactus-plugin"
 
 export interface IHealthCareApp {
   apiHost: string;
@@ -69,6 +70,17 @@ export class HealthCareApp {
     const nodeApiHostA = `http://${this.options.apiHost}:${addressInfoA.port}`;
     const nodeApiHostB = `http://${this.options.apiHost}:${addressInfoB.port}`;
 
+    const fabricApiClient1 = new FabricApi(new Configuration({ basePath: nodeApiHostA }));
+    const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));
+
+    this.log.info("Deploying chaincode...");
+
+    // Deploy contracts on both Fabric networks
+    const contractsInfo1=await this.infrastructure.deployFabricCbdcContract(fabricApiClient1); // return type mismatch
+    const contractsInfo2=await this.infrastructure.deployFabricAssetReferenceContract(fabricApiClient2);
+
+    this.log.info(`Chaincode deployed.`);
+
     const clientPluginRegistry = new PluginRegistry({
       plugins: [
         new PluginKeychainMemory({
@@ -77,6 +89,13 @@ export class HealthCareApp {
           logLevel: "INFO",
         }),
         fabricPlugin1,
+        new HealthCareCactusPlugin({
+          logLevel: "INFO",
+          contracts: contractsInfo1,
+          instanceId: uuidv4(),
+          fabricApiClient1,  // change to 1 
+          fabricEnvironment: org1Env,
+        })
       ],
     });
 
@@ -88,24 +107,18 @@ export class HealthCareApp {
           logLevel: "INFO",
         }),
         fabricPlugin2,
+        new HealthCareCactusPlugin({
+          logLevel: "INFO",
+          contracts: contractsInfo2,
+          instanceId: uuidv4(),
+          fabricApiClient2,  // change to 2
+          fabricEnvironment: org1Env,
+        })
       ],
     });
 
     const apiServer1 = await this.startNode(httpApiA, clientPluginRegistry);
     const apiServer2 = await this.startNode(httpApiB, serverPluginRegistry);
-
-    const fabricApiClient1 = new FabricApi(new Configuration({ basePath: nodeApiHostA }));
-    const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));
-
-    this.log.info("Deploying chaincode...");
-
-    // Deploy contracts on both Fabric networks
-    await this.infrastructure.deployFabricCbdcContract(fabricApiClient1);
-    await this.infrastructure.deployFabricAssetReferenceContract(fabricApiClient1);
-    await this.infrastructure.deployFabricCbdcContract(fabricApiClient2);
-    await this.infrastructure.deployFabricAssetReferenceContract(fabricApiClient2);
-
-    this.log.info(`Chaincode deployed.`);
 
     return {
       apiServer1,
