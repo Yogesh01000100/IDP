@@ -256,156 +256,15 @@ export class HealthCareAppDummyInfrastructure {
   }
 
   // smart contract deployment in fabric network
-  public async deployFabricAssetReferenceContract(
-    fabricApiClient: FabricApi,
-  ): Promise<void> {
-    const channelId = "mychannel";
-
-    const contractName = "asset-reference-contract";
-
-    const contractRelPath =
-      "../../../fabric-contracts/asset-reference/typescript";
-    const contractDir = path.join(__dirname, contractRelPath);
-
-    // ├── package.json
-    // ├── src
-    // │   ├── assetTransfer.ts
-    // │   ├── asset.ts
-    // │   └── index.ts
-    // ├── tsconfig.json
-    // └── tslint.json
-    const sourceFiles: FileBase64[] = [];
-    {
-      const filename = "./tsconfig.json";
-      const relativePath = "./";
-      const filePath = path.join(contractDir, relativePath, filename);
-      const buffer = await fs.readFile(filePath);
-      sourceFiles.push({
-        body: buffer.toString("base64"),
-        filepath: relativePath,
-        filename,
-      });
-    }
-    {
-      const filename = "./package.json";
-      const relativePath = "./";
-      const filePath = path.join(contractDir, relativePath, filename);
-      const buffer = await fs.readFile(filePath);
-      sourceFiles.push({
-        body: buffer.toString("base64"),
-        filepath: relativePath,
-        filename,
-      });
-    }
-    {
-      const filename = "./index.ts";
-      const relativePath = "./src/";
-      const filePath = path.join(contractDir, relativePath, filename);
-      const buffer = await fs.readFile(filePath);
-      sourceFiles.push({
-        body: buffer.toString("base64"),
-        filepath: relativePath,
-        filename,
-      });
-    }
-    {
-      const filename = "./asset-reference.ts";
-      const relativePath = "./src/";
-      const filePath = path.join(contractDir, relativePath, filename);
-      const buffer = await fs.readFile(filePath);
-      sourceFiles.push({
-        body: buffer.toString("base64"),
-        filepath: relativePath,
-        filename,
-      });
-    }
-    {
-      const filename = "./asset-reference-contract.ts";
-      const relativePath = "./src/";
-      const filePath = path.join(contractDir, relativePath, filename);
-      const buffer = await fs.readFile(filePath);
-      sourceFiles.push({
-        body: buffer.toString("base64"),
-        filepath: relativePath,
-        filename,
-      });
-    }
-
-    let retries = 0;
-    while (retries <= 5) {
-      await fabricApiClient
-        .deployContractV1(
-          {
-            channelId,
-            ccVersion: "1.0.0",
-            sourceFiles,
-            ccName: contractName,
-            targetOrganizations: [this.org1Env, this.org2Env],
-            caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
-            ccLabel: "asset-reference-contract",
-            ccLang: ChainCodeProgrammingLanguage.Typescript,
-            ccSequence: 1,
-            orderer: "orderer.example.com:7050",
-            ordererTLSHostnameOverride: "orderer.example.com",
-            connTimeout: 120,
-          },
-          {
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-          },
-        )
-        .then(async (res: { data: { packageIds: any; lifecycle: any } }) => {
-          retries = 6;
-
-          const { packageIds, lifecycle } = res.data;
-
-          const {
-            approveForMyOrgList,
-            installList,
-            queryInstalledList,
-            commit,
-            packaging,
-            queryCommitted,
-          } = lifecycle;
-
-          Checks.truthy(packageIds, `packageIds truthy OK`);
-          Checks.truthy(
-            Array.isArray(packageIds),
-            `Array.isArray(packageIds) truthy OK`,
-          );
-          Checks.truthy(approveForMyOrgList, `approveForMyOrgList truthy OK`);
-          Checks.truthy(
-            Array.isArray(approveForMyOrgList),
-            `Array.isArray(approveForMyOrgList) truthy OK`,
-          );
-          Checks.truthy(installList, `installList truthy OK`);
-          Checks.truthy(
-            Array.isArray(installList),
-            `Array.isArray(installList) truthy OK`,
-          );
-          Checks.truthy(queryInstalledList, `queryInstalledList truthy OK`);
-          Checks.truthy(
-            Array.isArray(queryInstalledList),
-            `Array.isArray(queryInstalledList) truthy OK`,
-          );
-          Checks.truthy(commit, `commit truthy OK`);
-          Checks.truthy(packaging, `packaging truthy OK`);
-          Checks.truthy(queryCommitted, `queryCommitted truthy OK`);
-        })
-        .catch(() => console.log("trying to deploy fabric contract again"));
-      retries++;
-    }
-  }
-  // smart contract deployment in fabric network
-  public async deployFabricCbdcContract(
+  public async deployFabricContract(
     fabricApiClient: FabricApi,
   ): Promise<void> {
     const channelId = "mychannel";
     const channelName = channelId;
 
-    const contractName = "cbdc";
+    const contractName = "EHRContract";
 
-    const contractRelPath = "../../../fabric-contracts/cbdc-erc-20/javascript";
+    const contractRelPath = "../../../fabric-contracts/contracts/typescript";
     const contractDir = path.join(__dirname, contractRelPath);
 
     // ├── package.json

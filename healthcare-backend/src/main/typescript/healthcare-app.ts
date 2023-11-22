@@ -76,8 +76,8 @@ export class HealthCareApp {
     this.log.info("Deploying chaincode...");
 
     // Deploy contracts on both Fabric networks
-    const contractsInfo1=await this.infrastructure.deployFabricCbdcContract(fabricApiClient1); // return type mismatch
-    const contractsInfo2=await this.infrastructure.deployFabricAssetReferenceContract(fabricApiClient2);
+    await this.infrastructure.deployFabricContract(fabricApiClient1); // return type mismatch if possible add
+    await this.infrastructure.deployFabricContract(fabricApiClient2);
 
     this.log.info(`Chaincode deployed.`);
 
@@ -91,7 +91,6 @@ export class HealthCareApp {
         fabricPlugin1,
         new HealthCareCactusPlugin({
           logLevel: "INFO",
-          contracts: contractsInfo1,
           instanceId: uuidv4(),
           fabricApiClient1,  // change to 1 
           fabricEnvironment: org1Env,
@@ -109,7 +108,6 @@ export class HealthCareApp {
         fabricPlugin2,// possible cause of problem
         new HealthCareCactusPlugin({
           logLevel: "INFO",
-          contracts: contractsInfo2,
           instanceId: uuidv4(),
           fabricApiClient2,  // change to 2
           fabricEnvironment: org1Env,
