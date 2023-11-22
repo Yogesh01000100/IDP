@@ -102,7 +102,7 @@ export class InsertDataEndpoint implements IWebServiceEndpoint {
           keychainRef: "user2",
         },
         channelName: "mychannel",
-        contractName: "shipment",
+        contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Send,
         methodName: "insertPatientFile",
         params: [shipment.id, shipment.bookshelfId],

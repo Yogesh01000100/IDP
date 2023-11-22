@@ -5,15 +5,15 @@
       "outDir": "./dist/lib/",
       "declarationDir": "dist/lib",
       "rootDir": "./src",
-      "tsBuildInfoFile": "../../.build-cache/healthcare-business-logic-plugin.tsbuildinfo"
+      "moduleResolution": "Node16",
+      "tsBuildInfoFile": "../../.build-cache/healthcare-backend.tsbuildinfo",
     },
-    "include": [
-      "./src",
-      "src/**/*.json"
-    ],
     "references": [
       {
         "path": "../../packages/cactus-api-client/tsconfig.json"
+      },
+      {
+        "path": "../../packages/cactus-cmd-api-server/tsconfig.json"
       },
       {
         "path": "../../packages/cactus-common/tsconfig.json"
@@ -25,13 +25,21 @@
         "path": "../../packages/cactus-core-api/tsconfig.json"
       },
       {
-        "path": "../../packages/cactus-plugin-consortium-manual/tsconfig.json"
-      },
-      {
         "path": "../../packages/cactus-plugin-keychain-memory/tsconfig.json"
       },
       {
         "path": "../../packages/cactus-plugin-ledger-connector-fabric/tsconfig.json"
+      },
+      {
+        "path": "../../packages/cactus-test-tooling/tsconfig.json"
       }
+    ],
+    "include": [
+      "./src",
+      "src/**/*.json"
+    ],
+    "exclude": [
+      "./src/fabric-contracts"
+      "./src/crypto-material"
     ]
   }

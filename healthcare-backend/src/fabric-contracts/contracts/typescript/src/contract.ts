@@ -3,11 +3,16 @@
  */
 
 import { Context, Contract, Info, Returns, Transaction } from "fabric-contract-api";
-
+interface PatientRecord {
+    id: string;
+    data:string;
+}
+  
 @Info({
     title: "EHRContract",
-    description: "Smart contract for managing electronic health records (EHR)"
+    description: "Chaincode for managing electronic health records (EHR)"
 })
+
 export class EHRContract extends Contract {
 
     // CreatePatientRecord creates a new patient record in the world state.
@@ -51,12 +56,12 @@ export class EHRContract extends Contract {
     @Transaction(false)
     @Returns("string")
     public async GetAllPatientRecords(ctx: Context): Promise<string> {
-        const allResults = [];
+        const allResults: PatientRecord[] = [];
         const iterator = await ctx.stub.getStateByRange("", "");
         let result = await iterator.next();
         while (!result.done) {
             const strValue = Buffer.from(result.value.value.toString()).toString("utf8");
-            let record;
+            let record:any;
             try {
                 record = JSON.parse(strValue);
             } catch (err) {

@@ -1,5 +1,5 @@
 {
-    "name": "@hyperledger/cactus-example-supply-chain-business-logic-plugin",
+    "name": "@hyperledger/healthcare-business-logic-plugin",
     "version": "2.0.0-alpha.2",
     "description": "An example business logic plugin implementation for Cactus",
     "keywords": [
@@ -32,7 +32,7 @@
     ],
     "main": "dist/lib/main/typescript/index.js",
     "module": "dist/lib/main/typescript/index.js",
-    "browser": "dist/cactus-example-supply-chain-business-logic-plugin.web.umd.js",
+    "browser": "dist/healthcare-business-logic-plugin.web.umd.js",
     "types": "dist/lib/main/typescript/index.d.ts",
     "files": [
       "dist/*"
@@ -56,9 +56,7 @@
       "@hyperledger/cactus-core-api": "2.0.0-alpha.2",
       "@hyperledger/cactus-plugin-consortium-manual": "2.0.0-alpha.2",
       "@hyperledger/cactus-plugin-keychain-memory": "2.0.0-alpha.2",
-      "@hyperledger/cactus-plugin-ledger-connector-besu": "2.0.0-alpha.2",
       "@hyperledger/cactus-plugin-ledger-connector-fabric": "2.0.0-alpha.2",
-      "@hyperledger/cactus-plugin-ledger-connector-quorum": "2.0.0-alpha.2",
       "async-exit-hook": "2.0.1",
       "axios": "1.5.1",
       "express": "4.18.2",
@@ -78,8 +76,8 @@
     "publishConfig": {
       "access": "public"
     },
-    "browserMinified": "dist/cactus-example-supply-chain-business-logic-plugin.web.umd.min.js",
-    "mainMinified": "dist/cactus-example-supply-chain-business-logic-plugin.node.umd.min.js",
+    "browserMinified": "dist/healthcare-business-logic-plugin.web.umd.min.js",
+    "mainMinified": "dist/healthcare-business-logic-plugin.node.umd.min.js",
     "watch": {
       "codegen:openapi": {
         "patterns": [

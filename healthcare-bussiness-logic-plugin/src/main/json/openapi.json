@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.3",
     "info": {
-      "title": "Hyperledger Cactus Example - Health Care App",
-      "description": "Demonstrates how a business use case can be satisfied with Cactus when multiple distinct ledgers are involved.",
+      "title": "Hyperledger Cactus Example - Health Care EHR App",
+      "description": "Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.",
       "version": "v2.0.0-alpha.2",
       "license": {
         "name": "Apache-2.0",
