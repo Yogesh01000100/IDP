@@ -1,7 +1,7 @@
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { Logger, Checks, LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
-import { FabricTestLedgerV1, DEFAULT_FABRIC_2_AIO_IMAGE_NAME, DEFAULT_FABRIC_2_AIO_IMAGE_VERSION } from "@hyperledger/cactus-test-tooling";
+import { FabricTestLedgerV1, FabricTestLedgerV2, DEFAULT_FABRIC_2_AIO_IMAGE_NAME, DEFAULT_FABRIC_2_AIO_IMAGE_VERSION } from "@hyperledger/cactus-test-tooling";
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
 import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
@@ -13,7 +13,7 @@ export interface IHealthCareInfrastructureOptions {
 
 export class HealthCareAppDummyInfrastructure {
   private readonly fabric1: FabricTestLedgerV1;
-  private readonly fabric2: FabricTestLedgerV1;
+  private readonly fabric2: FabricTestLedgerV2;
   private readonly log: Logger;
 
   constructor(public readonly options: IHealthCareInfrastructureOptions) {
@@ -33,8 +33,8 @@ export class HealthCareAppDummyInfrastructure {
       ]),
       logLevel: level || "DEBUG",
     });
-    // this fabric2 network has to be modified
-    this.fabric2 = new FabricTestLedgerV1({ // 
+
+    this.fabric2 = new FabricTestLedgerV2({ // 
       publishAllPorts: true,
       imageName: DEFAULT_FABRIC_2_AIO_IMAGE_NAME,
       imageVersion: DEFAULT_FABRIC_2_AIO_IMAGE_VERSION,

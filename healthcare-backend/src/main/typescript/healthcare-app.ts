@@ -35,7 +35,7 @@ export class HealthCareApp {
     const { logLevel } = options;
 
     const level = logLevel || "INFO";
-    const label = "cbdc-bridging-app";
+    const label = "healthcare-app";
     this.log = LoggerProvider.getOrCreate({ level, label });
 
     this.shutdownHooks = [];
@@ -106,7 +106,7 @@ export class HealthCareApp {
           instanceId: uuidv4(),
           logLevel: "INFO",
         }),
-        fabricPlugin2,
+        fabricPlugin2,// possible cause of problem
         new HealthCareCactusPlugin({
           logLevel: "INFO",
           contracts: contractsInfo2,

@@ -91,7 +91,7 @@ export class HealthCareCactusPlugin
       return this.endpoints;
     }  
 
-    // Endpoints for Org1
+    // Endpoints for net 1
     const insertDataOrg1 = new InsertDataEndpoint({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClientA,
@@ -104,7 +104,7 @@ export class HealthCareCactusPlugin
       keychainId: this.options.contracts.sourceRepository.keychainId,
     });
 
-    // Endpoints for Org2
+    // Endpoints for net 2
     const insertDataOrg2 = new InsertDataEndpoint({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClientB,
@@ -136,7 +136,7 @@ export class HealthCareCactusPlugin
   }
 
   public getPackageName(): string {
-    return "@hyperledger/cactus-example-healthcare-backend";
+    return "@hyperledger/healthcare-backend";
   }
 
   public async onPluginInit(): Promise<unknown> {
