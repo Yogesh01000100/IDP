@@ -34,7 +34,7 @@ export class HealthCareAppDummyInfrastructure {
       logLevel: level || "DEBUG",
     });
 
-    this.fabric2 = new FabricTestLedgerV2({ // 
+    this.fabric2 = new FabricTestLedgerV2({ 
       publishAllPorts: true,
       imageName: DEFAULT_FABRIC_2_AIO_IMAGE_NAME,
       imageVersion: DEFAULT_FABRIC_2_AIO_IMAGE_VERSION,
@@ -256,7 +256,7 @@ export class HealthCareAppDummyInfrastructure {
   }
   
   // smart contract deployment in fabric network
-  public async deployFabricContract(
+  public async deployFabricContract1(
     fabricApiClient: FabricApi,
   ): Promise<void>{
 
@@ -287,17 +287,6 @@ export class HealthCareAppDummyInfrastructure {
     {
       const filename = "./index.js";
       const relativePath = "./";
-      const filePath = path.join(contractDir, relativePath, filename);
-      const buffer = await fs.readFile(filePath);
-      sourceFiles.push({
-        body: buffer.toString("base64"),
-        filepath: relativePath,
-        filename,
-      });
-    }
-    {
-      const filename = "./tokenERC20.js";
-      const relativePath = "./lib/";
       const filePath = path.join(contractDir, relativePath, filename);
       const buffer = await fs.readFile(filePath);
       sourceFiles.push({
@@ -398,7 +387,144 @@ export class HealthCareAppDummyInfrastructure {
             },
           });
     
-          this.log.info(`Deployed smart contracts OK`);
+          this.log.info(`Deployed chaincode on 1st fabric OK`);
+        })
+        .catch(() => console.log("trying to deploy fabric contract again"));
+      retries++;
+    }
+  }
+  public async deployFabricContract2(
+    fabricApiClient: FabricApi,
+  ): Promise<void>{
+
+    const channelId = "mychannel";
+    const channelName = channelId;
+
+    const contractName = "EHRContract";
+
+    const contractRelPath = "../../../fabric-contracts/contracts/typescript";
+    const contractDir = path.join(__dirname, contractRelPath);
+
+    // ├── package.json
+    // ├── index.js
+    // ├── lib
+    // │   ├── tokenERC20.js
+    const sourceFiles: FileBase64[] = [];
+    {
+      const filename = "./package.json";
+      const relativePath = "./";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
+    {
+      const filename = "./index.js";
+      const relativePath = "./";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
+    {
+      const filename = "./crypto-material.json";
+      const relativePath = "./crypto-material/";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
+
+    let retries = 0;
+    while (retries <= 5) {
+      await fabricApiClient
+        .deployContractV1(
+          {
+            channelId,
+            ccVersion: "1.0.0",
+            sourceFiles,
+            ccName: contractName,
+            targetOrganizations: [this.org1Env, this.org2Env],
+            caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
+            ccLabel: "cbdc",
+            ccLang: ChainCodeProgrammingLanguage.Javascript,
+            ccSequence: 1,
+            orderer: "orderer.example.com:7051",
+            ordererTLSHostnameOverride: "orderer.example.com",
+            connTimeout: 120,
+          },
+          {
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+          },
+        )
+        .then(async (res: { data: { packageIds: any; lifecycle: any } }) => {
+          retries = 6;
+
+          const { packageIds, lifecycle } = res.data;
+
+          const {
+            approveForMyOrgList,
+            installList,
+            queryInstalledList,
+            commit,
+            packaging,
+            queryCommitted,
+          } = lifecycle;
+
+          Checks.truthy(packageIds, `packageIds truthy OK`);
+          Checks.truthy(
+            Array.isArray(packageIds),
+            `Array.isArray(packageIds) truthy OK`,
+          );
+          Checks.truthy(approveForMyOrgList, `approveForMyOrgList truthy OK`);
+          Checks.truthy(
+            Array.isArray(approveForMyOrgList),
+            `Array.isArray(approveForMyOrgList) truthy OK`,
+          );
+          Checks.truthy(installList, `installList truthy OK`);
+          Checks.truthy(
+            Array.isArray(installList),
+            `Array.isArray(installList) truthy OK`,
+          );
+          Checks.truthy(queryInstalledList, `queryInstalledList truthy OK`);
+          Checks.truthy(
+            Array.isArray(queryInstalledList),
+            `Array.isArray(queryInstalledList) truthy OK`,
+          );
+          Checks.truthy(commit, `commit truthy OK`);
+          Checks.truthy(packaging, `packaging truthy OK`);
+          Checks.truthy(queryCommitted, `queryCommitted truthy OK`);
+
+          // FIXME - without this wait it randomly fails with an error claiming that
+          // the endorsement was impossible to be obtained. The fabric-samples script
+          // does the same thing, it just waits 10 seconds for good measure so there
+          // might not be a way for us to avoid doing this, but if there is a way we
+          // absolutely should not have timeouts like this, anywhere...
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+
+          await fabricApiClient.runTransactionV1({
+            contractName,
+            channelName,
+            params: ["name1", "symbol1", "8"],
+            methodName: "Initialize",
+            invocationType: FabricContractInvocationType.Send,
+            signingCredential: {
+              keychainId: CryptoMaterial.keychains.keychain1.id,
+              keychainRef: "userA",
+            },
+          });
+    
+          this.log.info(`Deployed chaincode on 2nd fabric network OK`);
         })
         .catch(() => console.log("trying to deploy fabric contract again"));
       retries++;

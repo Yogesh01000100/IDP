@@ -17,11 +17,11 @@ import {
 
 import { DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 
-import { IHealthCareContractDeploymentInfo } from "../i-healthcare-contract-deployment-info";
+//import { IHealthCareContractDeploymentInfo } from "../i-healthcare-contract-deployment-info";
 
 import { InsertDataEndpoint } from "./web-services/insert-patient-endpoint";
 import { ListDataEndpoint } from "./web-services/list-patient-endpoint";
-
+import {CryptoMaterial} from "../../../crypto-material/crypto-material.json"
 
 export interface OrgEnv {
   CORE_PEER_LOCALMSPID: string;
@@ -59,14 +59,14 @@ export class HealthCareCactusPlugin
     Checks.truthy(options, `${fnTag} arg options`);
     Checks.truthy(options.instanceId, `${fnTag} arg options.instanceId`);
     Checks.nonBlankString(options.instanceId, `${fnTag} options.instanceId`);
-    Checks.truthy(options.contracts, `${fnTag} arg options.contracts`); // watch for contract variable
+    //Checks.truthy(options.contracts, `${fnTag} arg options.contracts`); // watch for contract variable
     Checks.truthy(
       options.fabricApiClient1,
-      `${fnTag} arg options.fabricApiClient`,
+      `${fnTag} arg options.fabricApiClient1`,
     );
     Checks.truthy(
       options.fabricApiClient2,
-      `${fnTag} arg options.fabricApiClient`,
+      `${fnTag} arg options.fabricApiClient2`,
     );
 
     const level = this.options.logLevel || "INFO";
@@ -94,26 +94,26 @@ export class HealthCareCactusPlugin
     const insertDataOrg1 = new InsertDataEndpoint({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
-      keychainId: this.options.contracts.sourceRepository.keychainId,
+      keychainId: CryptoMaterial.keychains.keychain1.id
     });
 
     const listDataOrg1 = new ListDataEndpoint({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
-      keychainId: this.options.contracts.sourceRepository.keychainId,
+      keychainId: CryptoMaterial.keychains.keychain1.id
     });
 
     // Endpoints for net 2
     const insertDataOrg2 = new InsertDataEndpoint({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient2,
-      keychainId: this.options.contracts.destinationRepository.keychainId,
+      keychainId: CryptoMaterial.keychains.keychain2.id
     });
 
     const listDatatOrg2 = new ListDataEndpoint({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient2,
-      keychainId: this.options.destinationRepository.keychainId, // contract variable
+      keychainId: CryptoMaterial.keychains.keychain2.id // contract variable
     });
 
     this.endpoints = [

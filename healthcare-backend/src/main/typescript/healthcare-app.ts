@@ -76,8 +76,8 @@ export class HealthCareApp {
     this.log.info("Deploying chaincode...");
 
     // Deploy contracts on both Fabric networks
-    await this.infrastructure.deployFabricContract(fabricApiClient1); // return type mismatch
-    await this.infrastructure.deployFabricContract(fabricApiClient2);
+    await this.infrastructure.deployFabricContract1(fabricApiClient1); // return type mismatch
+    await this.infrastructure.deployFabricContract2(fabricApiClient2);
 
     this.log.info(`Chaincode deployed.`);
 
