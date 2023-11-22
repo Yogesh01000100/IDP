@@ -5,6 +5,3 @@ export interface IHealthCareContractDeploymentInfo {
   destinationRepository: IFabricContractDeployment;
 }
 
-/*
- interface for the HealthCare
-*/

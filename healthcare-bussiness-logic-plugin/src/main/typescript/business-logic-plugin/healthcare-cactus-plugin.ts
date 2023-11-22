@@ -34,10 +34,9 @@ export interface OrgEnv {
 export interface IHealthCareCactusPluginOptions {
   logLevel?: LogLevelDesc;
   instanceId: string;
-  fabricApiClientA: FabricApi;
-  fabricApiClientB: FabricApi;
+  fabricApiClient1: FabricApi;
+  fabricApiClient2: FabricApi;
   fabricEnvironment?: NodeJS.ProcessEnv;
-  contracts: IHealthCareContractDeploymentInfo;
 }
 
 export class HealthCareCactusPlugin
@@ -60,13 +59,13 @@ export class HealthCareCactusPlugin
     Checks.truthy(options, `${fnTag} arg options`);
     Checks.truthy(options.instanceId, `${fnTag} arg options.instanceId`);
     Checks.nonBlankString(options.instanceId, `${fnTag} options.instanceId`);
-    Checks.truthy(options.contracts, `${fnTag} arg options.contracts`);
+    Checks.truthy(options.contracts, `${fnTag} arg options.contracts`); // watch for contract variable
     Checks.truthy(
-      options.fabricApiClientA,
+      options.fabricApiClient1,
       `${fnTag} arg options.fabricApiClient`,
     );
     Checks.truthy(
-      options.fabricApiClientB,
+      options.fabricApiClient2,
       `${fnTag} arg options.fabricApiClient`,
     );
 
@@ -94,27 +93,27 @@ export class HealthCareCactusPlugin
     // Endpoints for net 1
     const insertDataOrg1 = new InsertDataEndpoint({
       logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClientA,
+      fabricApi: this.options.fabricApiClient1,
       keychainId: this.options.contracts.sourceRepository.keychainId,
     });
 
     const listDataOrg1 = new ListDataEndpoint({
       logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClientA,
+      fabricApi: this.options.fabricApiClient1,
       keychainId: this.options.contracts.sourceRepository.keychainId,
     });
 
     // Endpoints for net 2
     const insertDataOrg2 = new InsertDataEndpoint({
       logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClientB,
+      fabricApi: this.options.fabricApiClient2,
       keychainId: this.options.contracts.destinationRepository.keychainId,
     });
 
     const listDatatOrg2 = new ListDataEndpoint({
       logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClientB,
-      keychainId: this.options.contracts.destinationRepository.keychainId,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: this.options.destinationRepository.keychainId, // contract variable
     });
 
     this.endpoints = [

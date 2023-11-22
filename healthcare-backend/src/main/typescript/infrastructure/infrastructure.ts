@@ -254,11 +254,12 @@ export class HealthCareAppDummyInfrastructure {
       },
     });
   }
-
+  
   // smart contract deployment in fabric network
   public async deployFabricContract(
     fabricApiClient: FabricApi,
-  ): Promise<void> {
+  ): Promise<void>{
+
     const channelId = "mychannel";
     const channelName = channelId;
 
@@ -396,6 +397,8 @@ export class HealthCareAppDummyInfrastructure {
               keychainRef: "userA",
             },
           });
+    
+          this.log.info(`Deployed smart contracts OK`);
         })
         .catch(() => console.log("trying to deploy fabric contract again"));
       retries++;
