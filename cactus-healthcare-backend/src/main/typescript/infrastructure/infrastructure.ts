@@ -1,11 +1,36 @@
+/* eslint-disable prettier/prettier */
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs-extra";
 import { Logger, Checks, LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
-import { FabricTestLedgerV1, FabricTestLedgerV2, DEFAULT_FABRIC_2_AIO_IMAGE_NAME, DEFAULT_FABRIC_2_AIO_IMAGE_VERSION } from "@hyperledger/cactus-test-tooling";
+import { FabricTestLedgerV1, DEFAULT_FABRIC_2_AIO_IMAGE_NAME, DEFAULT_FABRIC_2_AIO_IMAGE_VERSION } from "@hyperledger/cactus-test-tooling";
+import {FabricTestLedgerV2 } from "../../../../../../packages/cactus-test-tooling/src/main/typescript/fabric/fabric-test-ledger-v2";
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
 import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
+
+export const org1Env= {
+  CORE_PEER_LOCALMSPID: "Org1MSP",
+  CORE_PEER_ADDRESS: "peer0.org1.example.com:7051",
+  CORE_PEER_MSPCONFIGPATH:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
+  CORE_PEER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt",
+  ORDERER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+};
+
+export const org2Env= {
+  CORE_PEER_LOCALMSPID: "Org1MSP",
+  CORE_PEER_ADDRESS: "peer0.org1.example.com:9051",
+  CORE_PEER_MSPCONFIGPATH:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
+  CORE_PEER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt",
+  ORDERER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+};
 
 export interface IHealthCareInfrastructureOptions {
   logLevel?: LogLevelDesc;
@@ -15,6 +40,12 @@ export class HealthCareAppDummyInfrastructure {
   private readonly fabric1: FabricTestLedgerV1;
   private readonly fabric2: FabricTestLedgerV2;
   private readonly log: Logger;
+
+  public static readonly FABRIC_2_AIO_CLI_CFG_DIR =
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/";
+  public get orgCfgDir(): string {
+    return HealthCareAppDummyInfrastructure.FABRIC_2_AIO_CLI_CFG_DIR;
+  }
 
   constructor(public readonly options: IHealthCareInfrastructureOptions) {
     const fnTag = `HealthCareAppDummyInfrastructure#constructor()`;

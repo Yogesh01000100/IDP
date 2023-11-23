@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import OAS from "../../json/openapi.json";// to be done
 
 
@@ -21,7 +22,7 @@ import { DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-conne
 
 import { InsertDataEndpoint } from "./web-services/insert-patient-endpoint";
 import { ListDataEndpoint } from "./web-services/list-patient-endpoint";
-import {CryptoMaterial} from "../../../crypto-material/crypto-material.json"
+import { CryptoMaterial } from "../../../crypto-material/crypto-material.json";
 
 export interface OrgEnv {
   CORE_PEER_LOCALMSPID: string;

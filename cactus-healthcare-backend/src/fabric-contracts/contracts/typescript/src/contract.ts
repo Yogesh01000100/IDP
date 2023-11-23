@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /*
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,7 +11,7 @@ interface PatientRecord {
   
 @Info({
     title: "EHRContract",
-    description: "Chaincode for managing electronic health records (EHR)"
+    description: "Chaincode for managing electronic health records (EHR)",
 })
 
 export class EHRContract extends Contract {
@@ -25,7 +26,7 @@ export class EHRContract extends Contract {
 
         const record = {
             id: patientId,
-            data: recordData
+            data: recordData,
         };
 
         await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(record)));
@@ -84,7 +85,7 @@ export class EHRContract extends Contract {
 
         const updatedRecord = {
             id: patientId,
-            data: newRecordData
+            data: newRecordData,
         };
 
         await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(updatedRecord)));

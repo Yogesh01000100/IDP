@@ -8,7 +8,7 @@
       "tsBuildInfoFile": "../../.build-cache/healthcare-business-logic-plugin.tsbuildinfo"
     },
     "include": [
-      "./src",
+      "./src/**/*",
       "src/**/*.json"
     ],
     "references": [
