@@ -23,24 +23,24 @@ import {
 
 import OAS from "../../../json/openapi.json"; // to be updated
 
-export interface IListDataEndpointOptions {
+export interface IListDataHspBOptions {
   readonly logLevel?: LogLevelDesc;
   readonly fabricApi: FabricApi;
   readonly keychainId: string;
 }
 
-export class ListDataEndpoint implements IWebServiceEndpoint {
+export class ListDataHspB implements IWebServiceEndpoint {
   public static readonly CLASS_NAME = "ListDataEndpoint";
   private readonly log: Logger;
   private readonly keychainId: string;
 
   public get className(): string {
-    return ListDataEndpoint.CLASS_NAME;
+    return ListDataHspB.CLASS_NAME;
   }
 
-  public getOasPath(): (typeof OAS.paths)["/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-shipment"] {
+  public getOasPath(): (typeof OAS.paths)["/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"] {
     return OAS.paths[
-      "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-shipment"
+      "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"
     ];
   }
 
@@ -58,7 +58,7 @@ export class ListDataEndpoint implements IWebServiceEndpoint {
     return this.getOasPath().get.operationId;
   }
 
-  constructor(public readonly opts: IListDataEndpointOptions) {
+  constructor(public readonly opts: IListDataHspBOptions) {
     const fnTag = `${this.className}#constructor()`;
     Checks.truthy(opts, `${fnTag} arg options`);
     Checks.truthy(opts.fabricApi, `${fnTag} options.fabricApi`);
@@ -101,10 +101,10 @@ export class ListDataEndpoint implements IWebServiceEndpoint {
           keychainRef: "user2",
         },
         channelName: "mychannel",
-        contractName: "healthcare",
+        contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Call,
-        methodName: "getPatientFile", //updated the method to be called
-        params: [],
+        methodName: "ReadPatientRecord",
+        params: [], // pass the ID of the patient
       };
       const {
         data: { functionOutput },

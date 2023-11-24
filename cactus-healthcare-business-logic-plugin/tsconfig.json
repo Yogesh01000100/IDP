@@ -5,7 +5,7 @@
       "outDir": "./dist/lib/",
       "declarationDir": "dist/lib",
       "rootDir": "./src",
-      "tsBuildInfoFile": "../../.build-cache/healthcare-business-logic-plugin.tsbuildinfo"
+      "tsBuildInfoFile": "../../.build-cache/cactus-healthcare-business-logic-plugin.tsbuildinfo"
     },
     "include": [
       "./src/**/*",

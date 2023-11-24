@@ -20,8 +20,9 @@ import { DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-conne
 
 //import { IHealthCareContractDeploymentInfo } from "../i-healthcare-contract-deployment-info";
 
-import { InsertDataEndpoint } from "./web-services/insert-patient-endpoint";
-import { ListDataEndpoint } from "./web-services/list-patient-endpoint";
+import { InsertDataHspA } from "./web-services/insert-patient-hspa";
+import { ListDataHspA } from "./web-services/list-patient-hspa";
+import { ListDataHspB } from "./web-services/list-patient-hspb";
 import { CryptoMaterial } from "../../../crypto-material/crypto-material.json";
 
 export interface OrgEnv {
@@ -91,27 +92,22 @@ export class HealthCareCactusPlugin
       return this.endpoints;
     }  
 
-    // Endpoints for net 1
-    const insertDataOrg1 = new InsertDataEndpoint({
+    // Endpoints for network 1
+    const insertDataOrg1 = new InsertDataHspA({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
       keychainId: CryptoMaterial.keychains.keychain1.id
     });
 
-    const listDataOrg1 = new ListDataEndpoint({
+    const listDataOrg1 = new ListDataHspA({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
       keychainId: CryptoMaterial.keychains.keychain1.id
     });
 
-    // Endpoints for net 2
-    const insertDataOrg2 = new InsertDataEndpoint({
-      logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClient2,
-      keychainId: CryptoMaterial.keychains.keychain2.id
-    });
+    // Endpoints for network 2
 
-    const listDatatOrg2 = new ListDataEndpoint({
+    const listDataOrg2 = new ListDataHspB({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient2,
       keychainId: CryptoMaterial.keychains.keychain2.id // contract variable
@@ -120,8 +116,7 @@ export class HealthCareCactusPlugin
     this.endpoints = [
       insertDataOrg1,
       listDataOrg1,
-      insertDataOrg2,
-      listDatatOrg2,
+      listDataOrg2,
     ];
 
     return this.endpoints;
@@ -136,7 +131,7 @@ export class HealthCareCactusPlugin
   }
 
   public getPackageName(): string {
-    return "@hyperledger/healthcare-backend";
+    return "@hyperledger/cactus-healthcare-backend";
   }
 
   public async onPluginInit(): Promise<unknown> {
