@@ -91,11 +91,12 @@ export class InsertDataHspA implements IWebServiceEndpoint {
     return this.handleRequest.bind(this);
   }
 
-  async handleRequest(req: Request, res: Response): Promise<void> { // main handling of the req for creating patient data
+  async handleRequest(req: Request, res: Response): Promise<void> {
+    // main handling of the req for creating patient data
     const tag = `${this.getVerbLowerCase().toUpperCase()} ${this.getPath()}`;
     try {
-      const { p_data } = req.body as InsertShipmentRequest; //  change InsertShipmentRequest
-      this.log.debug(`${tag} %o`, p_data);
+      const { shipment } = req.body as InsertShipmentRequest; //  change InsertShipmentRequest
+      this.log.debug(`${tag} %o`, shipment);
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
@@ -105,7 +106,7 @@ export class InsertDataHspA implements IWebServiceEndpoint {
         contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Send,
         methodName: "CreatePatientRecord",
-        params: [p_data.id, p_data.bookshelfId],  // here the chaincode has to be updated in order to match the param structure
+        params: [shipment.id, shipment.bookshelfId], // here the chaincode has to be updated in order to match the param structure
       };
       const {
         data: { functionOutput },

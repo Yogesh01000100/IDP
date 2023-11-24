@@ -3,8 +3,15 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs-extra";
 import { Logger, Checks, LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
-import { FabricTestLedgerV1, DEFAULT_FABRIC_2_AIO_IMAGE_NAME, DEFAULT_FABRIC_2_AIO_IMAGE_VERSION } from "@hyperledger/cactus-test-tooling";
-import {FabricTestLedgerV2 } from "../../../../../../packages/cactus-test-tooling/src/main/typescript/fabric/fabric-test-ledger-v2";
+import { FabricTestLedgerV1, 
+  FabricTestLedgerV2, 
+  DEFAULT_FABRIC_2_AIO_FABRIC_VERSION, 
+  DEFAULT_FABRIC_2_AIO_IMAGE_NAME,
+  DEFAULT_FABRIC_2_AIO_IMAGE_VERSION,
+  DEFAULT_FABRIC_2_AIO_FABRIC_VERSION_V2, 
+  DEFAULT_FABRIC_2_AIO_IMAGE_NAME_V2,
+  DEFAULT_FABRIC_2_AIO_IMAGE_VERSION_V2,
+} from "@hyperledger/cactus-test-tooling";
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
 import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
@@ -60,17 +67,17 @@ export class HealthCareAppDummyInfrastructure {
       imageName: DEFAULT_FABRIC_2_AIO_IMAGE_NAME,
       imageVersion: DEFAULT_FABRIC_2_AIO_IMAGE_VERSION,
       envVars: new Map([
-        ["FABRIC_VERSION", DEFAULT_FABRIC_2_AIO_IMAGE_VERSION],
+        ["FABRIC_VERSION", DEFAULT_FABRIC_2_AIO_FABRIC_VERSION],
       ]),
       logLevel: level || "DEBUG",
     });
 
     this.fabric2 = new FabricTestLedgerV2({ 
       publishAllPorts: true,
-      imageName: DEFAULT_FABRIC_2_AIO_IMAGE_NAME,
-      imageVersion: DEFAULT_FABRIC_2_AIO_IMAGE_VERSION,
+      imageName: DEFAULT_FABRIC_2_AIO_IMAGE_NAME_V2,
+      imageVersion: DEFAULT_FABRIC_2_AIO_IMAGE_VERSION_V2,
       envVars: new Map([
-        ["FABRIC_VERSION", "2.2.0"],
+        ["FABRIC_VERSION", DEFAULT_FABRIC_2_AIO_FABRIC_VERSION_V2],
       ]),
       logLevel: level || "DEBUG",
     });
@@ -112,14 +119,14 @@ export class HealthCareAppDummyInfrastructure {
 
   public async start(): Promise<void> {
     try {
-      this.log.info(`Starting dummy infrastructure...`);
+      this.log.info(`Starting Healthcare infrastructure...`);
       await Promise.all([
         this.fabric1.start(),
         this.fabric2.start(),
       ]);
-      this.log.info(`Started dummy infrastructure OK`);
+      this.log.info(`Started Healthcare infrastructure OK`);
     } catch (ex) {
-      this.log.error(`Starting of dummy infrastructure crashed: `, ex);
+      this.log.error(`Starting of Healthcare infrastructure crashed: `, ex);
       throw ex;
     }
   }

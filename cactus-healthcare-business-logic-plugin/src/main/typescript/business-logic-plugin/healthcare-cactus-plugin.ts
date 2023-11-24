@@ -23,7 +23,7 @@ import { DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-conne
 import { InsertDataHspA } from "./web-services/insert-patient-hspa";
 import { ListDataHspA } from "./web-services/list-patient-hspa";
 import { ListDataHspB } from "./web-services/list-patient-hspb";
-import { CryptoMaterial } from "../../../crypto-material/crypto-material.json";
+import CryptoMaterial from "../../../crypto-material/crypto-material.json";
 
 export interface OrgEnv {
   CORE_PEER_LOCALMSPID: string;
