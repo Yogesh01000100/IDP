@@ -59,5 +59,3 @@ export interface DestinationRepository {
      */
     'sourceRepositoryId': string;
 }
-
-docker run \ --rm \ --privileged \ -p 3000:3000 \ -p 3100:3100 \ -p 3200:3200 \ -p 4000:4000 \ -p 4100:4100 \ -p 4200:4200 \ ghcr.io/hyperledger/cactus-example-supply-chain-app:2023-11-15-2510ff5

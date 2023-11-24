@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Hyperledger Cactus Example - Supply Chain App",
-    "description": "Demonstrates how a business use case can be satisfied with Cactus when multiple distinct ledgers are involved.",
+    "title": "Hyperledger Cactus Example - Health Care EHR App",
+    "description": "Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.",
     "version": "v2.0.0-alpha.2",
     "license": {
       "name": "Apache-2.0",
@@ -11,9 +11,9 @@
   },
   "components": {
     "schemas": {
-      "Shipment": {
+      "HospitalNetworkA": {
         "type": "object",
-        "required": ["id", "bookshelfId"],
+        "required": ["id", "HIdB"],
         "properties": {
           "id": {
             "type": "string",
@@ -21,8 +21,8 @@
             "minLength": 1,
             "maxLength": 1024
           },
-          "bookshelfId": {
-            "description": "The foreign key ID referencing the bookshelfId that will go in the shipment.",
+          "HIdB": {
+            "description": "The foreign key ID referencing the corresponding entry in HospitalNetworkB.",
             "type": "string",
             "minLength": 1,
             "maxLength": 1024,
@@ -30,80 +30,29 @@
           }
         }
       },
-      "Bookshelf": {
+      "HospitalNetworkB": {
         "type": "object",
-        "required": ["id", "shelfCount", "bambooHarvestId"],
+        "required": ["id"],
         "properties": {
           "id": {
             "type": "string",
             "nullable": false,
             "minLength": 1,
             "maxLength": 1024
-          },
-          "shelfCount": {
-            "description": "The number of shelves the bookshelf comes with.",
-            "type": "number",
-            "nullable": false,
-            "minimum": 1,
-            "maximum": 255
-          },
-          "bambooHarvestId": {
-            "description": "The foreign key ID referencing the bamboo harvest that yielded the wood material for the construction of the bookshelf.",
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 1024,
-            "nullable": false
           }
         }
       },
-      "BambooHarvest": {
+      "InsertDataRequest": {
         "type": "object",
-        "required": ["id", "location", "startedAt", "endedAt", "harvester"],
+        "required": ["data"],
         "properties": {
-          "id": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
-          },
-          "location": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
-          },
-          "startedAt": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
-          },
-          "endedAt": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
-          },
-          "harvester": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
+          "data": {
+            "$ref": "#/components/schemas/HospitalNetworkA"
           }
         }
       },
-      "InsertBambooHarvestRequest": {
+      "InsertDataResponseHSPA": {
         "type": "object",
-        "required": ["bambooHarvest"],
-        "properties": {
-          "bambooHarvest": {
-            "$ref": "#/components/schemas/BambooHarvest"
-          }
-        }
-      },
-      "InsertBambooHarvestResponse": {
-        "type": "object",
-        "required": [],
         "properties": {
           "callOutput": {
             "type": "object",
@@ -115,7 +64,7 @@
           }
         }
       },
-      "ListBambooHarvestResponse": {
+      "ListHSPAResponse": {
         "type": "object",
         "required": ["data"],
         "properties": {
@@ -124,37 +73,14 @@
             "nullable": false,
             "default": [],
             "items": {
-              "$ref": "#/components/schemas/BambooHarvest",
-              "minItems": 0,
-              "maxItems": 65535
-            }
+              "$ref": "#/components/schemas/HospitalNetworkA"
+            },
+            "minItems": 0,
+            "maxItems": 65535
           }
         }
       },
-      "InsertBookshelfRequest": {
-        "type": "object",
-        "required": ["bookshelf"],
-        "properties": {
-          "bookshelf": {
-            "$ref": "#/components/schemas/Bookshelf"
-          }
-        }
-      },
-      "InsertBookshelfResponse": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "callOutput": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "transactionReceipt": {
-            "type": "object",
-            "additionalProperties": true
-          }
-        }
-      },
-      "ListBookshelfResponse": {
+      "ListHSPBResponse": {
         "type": "object",
         "required": ["data"],
         "properties": {
@@ -163,71 +89,32 @@
             "nullable": false,
             "default": [],
             "items": {
-              "$ref": "#/components/schemas/Bookshelf",
-              "minItems": 0,
-              "maxItems": 65535
-            }
-          }
-        }
-      },
-      "InsertShipmentRequest": {
-        "type": "object",
-        "required": ["shipment"],
-        "properties": {
-          "shipment": {
-            "$ref": "#/components/schemas/Shipment"
-          }
-        }
-      },
-      "InsertShipmentResponse": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "callOutput": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "transactionReceipt": {
-            "type": "object",
-            "additionalProperties": true
-          }
-        }
-      },
-      "ListShipmentResponse": {
-        "type": "object",
-        "required": ["data"],
-        "properties": {
-          "data": {
-            "type": "array",
-            "nullable": false,
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/Shipment",
-              "minItems": 0,
-              "maxItems": 65535
-            }
+              "$ref": "#/components/schemas/HospitalNetworkB"
+            },
+            "minItems": 0,
+            "maxItems": 65535
           }
         }
       }
     }
   },
   "paths": {
-    "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-bookshelf": {
+    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa": {
       "post": {
-        "operationId": "insertBookshelfV1",
-        "x-hyperledger-cacti": {
+        "x-hyperledger-cactus": {
           "http": {
             "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-bookshelf"
+            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa"
           }
         },
-        "summary": "Inserts the provided Bookshelf entity to the ledger.",
+        "operationId": "InsertDataRequestV1",
+        "summary": "Inserts the provided data entity to the ledger.",
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InsertBookshelfRequest"
+                "$ref": "#/components/schemas/InsertDataRequest"
               }
             }
           }
@@ -238,7 +125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InsertBookshelfResponse"
+                  "$ref": "#/components/schemas/InsertDataResponseHSPA"
                 }
               }
             }
@@ -246,16 +133,16 @@
         }
       }
     },
-    "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-bookshelf": {
+    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa": {
       "get": {
-        "operationId": "listBookshelfV1",
-        "x-hyperledger-cacti": {
+        "x-hyperledger-cactus": {
           "http": {
             "verbLowerCase": "get",
-            "path": "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-bookshelf"
+            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa"
           }
         },
-        "summary": "Lists all the Bookshelf entities stored on the ledger.",
+        "operationId": "listDataV1",
+        "summary": "Lists all the Data entities stored on the ledger.",
         "parameters": [],
         "responses": {
           "200": {
@@ -263,7 +150,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListBookshelfResponse"
+                  "$ref": "#/components/schemas/ListHSPAResponse"
                 }
               }
             }
@@ -271,123 +158,30 @@
         }
       }
     },
-    "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-shipment": {
-      "post": {
-        "x-hyperledger-cacti": {
-          "http": {
-            "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-shipment"
-          }
-        },
-        "operationId": "insertShipmentV1",
-        "summary": "Inserts the provided Shipment entity to the ledger.",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InsertShipmentRequest"
-              }
+    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb": {
+        "get": {
+          "operationId": "ListHSPBResponseV1",
+          "x-hyperledger-cacti": {
+            "http": {
+              "verbLowerCase": "get",
+              "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"
             }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InsertShipmentResponse"
+          },
+          "summary": "Lists all the BambooHarvest entities stored on the ledger.",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ListHSPBResponse"
+                  }
                 }
               }
             }
           }
         }
       }
-    },
-    "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-shipment": {
-      "get": {
-        "x-hyperledger-cacti": {
-          "http": {
-            "verbLowerCase": "get",
-            "path": "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-shipment"
-          }
-        },
-        "operationId": "listShipmentV1",
-        "summary": "Lists all the Shipments entities stored on the ledger.",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListShipmentResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-bamboo-harvest": {
-      "post": {
-        "operationId": "insertBambooHarvestV1",
-        "x-hyperledger-cacti": {
-          "http": {
-            "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-bamboo-harvest"
-          }
-        },
-        "summary": "Inserts the provided BambooHarvest entity to the ledger.",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InsertBambooHarvestRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InsertBambooHarvestResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-bamboo-harvest": {
-      "get": {
-        "operationId": "listBambooHarvestV1",
-        "x-hyperledger-cacti": {
-          "http": {
-            "verbLowerCase": "get",
-            "path": "/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-bamboo-harvest"
-          }
-        },
-        "summary": "Lists all the BambooHarvest entities stored on the ledger.",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListBambooHarvestResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
   }
 }

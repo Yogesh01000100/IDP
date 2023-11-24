@@ -24,13 +24,6 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
 
-
-
-
-
-
-
-
 /**
  * 
  * @export
