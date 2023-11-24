@@ -1,7 +1,7 @@
 {
-    "name": "@hyperledger/healthcare-backend",
+    "name": "@hyperledger/cactus-healthcare-backend",
     "version": "2.0.0-alpha.2",
-    "description": "An example application showing how to use Cacti when implementing a CBDC bridging application between Hyperledger Fabric and Hyperledger Besu.",
+    "description": "An example application",
     "keywords": [
         "Hyperledger",
         "Cacti",
@@ -35,7 +35,7 @@
     ],
     "main": "dist/lib/main/typescript/index.js",
     "module": "dist/lib/main/typescript/index.js",
-    "browser": "dist/healthcare-backend.web.umd.js",
+    "browser": "dist/cactus-healthcare-backend.web.umd.js",
     "types": "dist/lib/main/typescript/index.d.ts",
     "files": [
         "dist/*"
@@ -60,7 +60,6 @@
         "@hyperledger/cactus-plugin-keychain-memory": "2.0.0-alpha.2",
         "@hyperledger/cactus-plugin-ledger-connector-fabric": "2.0.0-alpha.2",
         "@hyperledger/cactus-test-tooling": "2.0.0-alpha.2",
-        "@hyperledger/healthcare-business-logic-plugin": "2.0.0-alpha.2",
         "@openzeppelin/contracts": "4.9.3",
         "@openzeppelin/contracts-upgradeable": "4.9.3",
         "async-exit-hook": "2.0.1",
@@ -103,6 +102,6 @@
     "publishConfig": {
         "access": "public"
     },
-    "browserMinified": "dist/healthcare-backend.web.umd.min.js",
-    "mainMinified": "dist/healthcare-backend.node.umd.min.js"
+    "browserMinified": "dist/cactus-healthcare-backend.web.umd.min.js",
+    "mainMinified": "dist/cactus-healthcare-backend.node.umd.min.js"
 }

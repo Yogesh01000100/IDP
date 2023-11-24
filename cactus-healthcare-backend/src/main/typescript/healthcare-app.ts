@@ -10,7 +10,7 @@ import { Configuration, DefaultApi as FabricApi } from "@hyperledger/cactus-plug
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
 import { HealthCareAppDummyInfrastructure, org1Env, org2Env } from "./infrastructure/infrastructure";
 import CryptoMaterial from "../../crypto-material/crypto-material.json";
-import { HealthCareCactusPlugin } from "@hyperledger/healthcare-business-logic-plugin";
+import { HealthCareCactusPlugin } from "../../../../cactus-healthcare-business-logic-plugin";
 
 export interface IHealthCareApp {
   apiHost: string;
