@@ -16,7 +16,7 @@ import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory
 import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
-
+// possible errors
 export const org1Env= {
   CORE_PEER_LOCALMSPID: "Org1MSP",
   CORE_PEER_ADDRESS: "peer0.org1.example.com:7051",
@@ -27,10 +27,10 @@ export const org1Env= {
   ORDERER_TLS_ROOTCERT_FILE:
     "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 };
-
+// possible errors
 export const org2Env= {
   CORE_PEER_LOCALMSPID: "Org1MSP",
-  CORE_PEER_ADDRESS: "peer0.org1.example.com:9051",
+  CORE_PEER_ADDRESS: "peer0.org2.example.com:9151",
   CORE_PEER_MSPCONFIGPATH:
     "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
   CORE_PEER_TLS_ROOTCERT_FILE:
@@ -44,13 +44,19 @@ export interface IHealthCareInfrastructureOptions {
 }
 
 export class HealthCareAppDummyInfrastructure {
+  public static readonly CLASS_NAME = "HealthCareAppDummyInfrastructure";
+  public static readonly FABRIC_2_AIO_CLI_CFG_DIR =
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/";
+
   private readonly fabric1: FabricTestLedgerV1;
   private readonly fabric2: FabricTestLedgerV2;
   private readonly log: Logger;
 
-  public static readonly FABRIC_2_AIO_CLI_CFG_DIR =
-    "/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/";
-  public get orgCfgDir(): string {
+  public get className(): string {
+    return HealthCareAppDummyInfrastructure.CLASS_NAME;
+  }
+
+  public get orgCfgDir(): string { // error cause
     return HealthCareAppDummyInfrastructure.FABRIC_2_AIO_CLI_CFG_DIR;
   }
 
@@ -83,6 +89,7 @@ export class HealthCareAppDummyInfrastructure {
     });
   }
 
+  // org1Env possible cause for errors
   public get org1Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x {
     return {
       CORE_LOGGING_LEVEL: "debug",
@@ -100,6 +107,7 @@ export class HealthCareAppDummyInfrastructure {
     };
   }
 
+  // org2Env  possible cause for errors
   public get org2Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x {
     return {
       CORE_LOGGING_LEVEL: "debug",
@@ -110,7 +118,7 @@ export class HealthCareAppDummyInfrastructure {
       CORE_PEER_TLS_ENABLED: "true",
       ORDERER_CA: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
 
-      CORE_PEER_ADDRESS: "peer0.org2.example.com:9051",
+      CORE_PEER_ADDRESS: "peer0.org2.example.com:9151",
       CORE_PEER_MSPCONFIGPATH: `${this.orgCfgDir}peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp`,
       CORE_PEER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt`,
       ORDERER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
@@ -197,7 +205,7 @@ export class HealthCareAppDummyInfrastructure {
 
     const pluginRegistry = new PluginRegistry({ plugins: [keychainPlugin] });
 
-    this.log.info(`Creating Fabric Connector...`);
+    this.log.info(`Creating Fabric Connector1...`);
     return new PluginLedgerConnectorFabric({
       instanceId: uuidv4(),
       dockerBinary: "/usr/local/bin/docker",
@@ -278,7 +286,7 @@ export class HealthCareAppDummyInfrastructure {
       peerBinary: "/fabric-samples/bin/peer",
       goBinary: "/usr/local/go/bin/go",
       pluginRegistry,
-      cliContainerEnv: this.org1Env,
+      cliContainerEnv: this.org2Env,
       sshConfig,
       connectionProfile: connectionProfileOrg1,
       logLevel: this.options.logLevel || "INFO",
@@ -297,20 +305,27 @@ export class HealthCareAppDummyInfrastructure {
   public async deployFabricContract1(
     fabricApiClient: FabricApi,
   ): Promise<void>{
+    this.log.info("Inside deployFabricContract1...");
 
     const channelId = "mychannel";
-    const channelName = channelId;
 
     const contractName = "EHRContract";
 
     const contractRelPath = "../../../fabric-contracts/contracts/typescript";
     const contractDir = path.join(__dirname, contractRelPath);
 
-    // ├── package.json
-    // ├── index.js
-    // ├── lib
-    // │   ├── tokenERC20.js
     const sourceFiles: FileBase64[] = [];
+    {
+      const filename = "./tsconfig.json";
+      const relativePath = "./";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
     {
       const filename = "./package.json";
       const relativePath = "./";
@@ -323,8 +338,8 @@ export class HealthCareAppDummyInfrastructure {
       });
     }
     {
-      const filename = "./index.js";
-      const relativePath = "./";
+      const filename = "./index.ts";
+      const relativePath = "./src/";
       const filePath = path.join(contractDir, relativePath, filename);
       const buffer = await fs.readFile(filePath);
       sourceFiles.push({
@@ -334,8 +349,8 @@ export class HealthCareAppDummyInfrastructure {
       });
     }
     {
-      const filename = "./crypto-material.json";
-      const relativePath = "./crypto-material/";
+      const filename = "./EHR.ts";
+      const relativePath = "./src/";
       const filePath = path.join(contractDir, relativePath, filename);
       const buffer = await fs.readFile(filePath);
       sourceFiles.push({
@@ -344,9 +359,10 @@ export class HealthCareAppDummyInfrastructure {
         filename,
       });
     }
-
+    this.log.info("File paths navigated...");
     let retries = 0;
     while (retries <= 5) {
+      this.log.info("Inside loop... count :", retries);
       await fabricApiClient
         .deployContractV1(
           {
@@ -356,8 +372,8 @@ export class HealthCareAppDummyInfrastructure {
             ccName: contractName,
             targetOrganizations: [this.org1Env, this.org2Env],
             caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
-            ccLabel: "cbdc",
-            ccLang: ChainCodeProgrammingLanguage.Javascript,
+            ccLabel: "EHRContract",
+            ccLang: ChainCodeProgrammingLanguage.Typescript,
             ccSequence: 1,
             orderer: "orderer.example.com:7050",
             ordererTLSHostnameOverride: "orderer.example.com",
@@ -405,27 +421,6 @@ export class HealthCareAppDummyInfrastructure {
           Checks.truthy(commit, `commit truthy OK`);
           Checks.truthy(packaging, `packaging truthy OK`);
           Checks.truthy(queryCommitted, `queryCommitted truthy OK`);
-
-          // FIXME - without this wait it randomly fails with an error claiming that
-          // the endorsement was impossible to be obtained. The fabric-samples script
-          // does the same thing, it just waits 10 seconds for good measure so there
-          // might not be a way for us to avoid doing this, but if there is a way we
-          // absolutely should not have timeouts like this, anywhere...
-          await new Promise((resolve) => setTimeout(resolve, 10000));
-
-          await fabricApiClient.runTransactionV1({
-            contractName,
-            channelName,
-            params: ["name1", "symbol1", "8"],
-            methodName: "Initialize",
-            invocationType: FabricContractInvocationType.Send,
-            signingCredential: {
-              keychainId: CryptoMaterial.keychains.keychain1.id,
-              keychainRef: "userA",
-            },
-          });
-    
-          this.log.info(`Deployed chaincode on 1st fabric OK`);
         })
         .catch(() => console.log("trying to deploy fabric contract again"));
       retries++;
@@ -435,19 +430,26 @@ export class HealthCareAppDummyInfrastructure {
     fabricApiClient: FabricApi,
   ): Promise<void>{
 
+    this.log.info("Inside deployFabricContract2...");
     const channelId = "mychannel";
-    const channelName = channelId;
 
     const contractName = "EHRContract";
 
     const contractRelPath = "../../../fabric-contracts/contracts/typescript";
     const contractDir = path.join(__dirname, contractRelPath);
 
-    // ├── package.json
-    // ├── index.js
-    // ├── lib
-    // │   ├── tokenERC20.js
     const sourceFiles: FileBase64[] = [];
+    {
+      const filename = "./tsconfig.json";
+      const relativePath = "./";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
     {
       const filename = "./package.json";
       const relativePath = "./";
@@ -460,8 +462,8 @@ export class HealthCareAppDummyInfrastructure {
       });
     }
     {
-      const filename = "./index.js";
-      const relativePath = "./";
+      const filename = "./index.ts";
+      const relativePath = "./src/";
       const filePath = path.join(contractDir, relativePath, filename);
       const buffer = await fs.readFile(filePath);
       sourceFiles.push({
@@ -471,8 +473,8 @@ export class HealthCareAppDummyInfrastructure {
       });
     }
     {
-      const filename = "./crypto-material.json";
-      const relativePath = "./crypto-material/";
+      const filename = "./contract.ts";
+      const relativePath = "./src/";
       const filePath = path.join(contractDir, relativePath, filename);
       const buffer = await fs.readFile(filePath);
       sourceFiles.push({
@@ -481,9 +483,10 @@ export class HealthCareAppDummyInfrastructure {
         filename,
       });
     }
-
+    this.log.info("File paths navigated...");
     let retries = 0;
     while (retries <= 5) {
+      this.log.info("Inside loop... count :", retries);
       await fabricApiClient
         .deployContractV1(
           {
@@ -491,12 +494,12 @@ export class HealthCareAppDummyInfrastructure {
             ccVersion: "1.0.0",
             sourceFiles,
             ccName: contractName,
-            targetOrganizations: [this.org1Env, this.org2Env],
+            targetOrganizations: [this.org1Env, this.org2Env], // change the organisation port
             caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
-            ccLabel: "cbdc",
-            ccLang: ChainCodeProgrammingLanguage.Javascript,
+            ccLabel: "HealthCareEHR",
+            ccLang: ChainCodeProgrammingLanguage.Typescript,
             ccSequence: 1,
-            orderer: "orderer.example.com:7051",
+            orderer: "orderer.example.com:7150",
             ordererTLSHostnameOverride: "orderer.example.com",
             connTimeout: 120,
           },
@@ -542,27 +545,6 @@ export class HealthCareAppDummyInfrastructure {
           Checks.truthy(commit, `commit truthy OK`);
           Checks.truthy(packaging, `packaging truthy OK`);
           Checks.truthy(queryCommitted, `queryCommitted truthy OK`);
-
-          // FIXME - without this wait it randomly fails with an error claiming that
-          // the endorsement was impossible to be obtained. The fabric-samples script
-          // does the same thing, it just waits 10 seconds for good measure so there
-          // might not be a way for us to avoid doing this, but if there is a way we
-          // absolutely should not have timeouts like this, anywhere...
-          await new Promise((resolve) => setTimeout(resolve, 10000));
-
-          await fabricApiClient.runTransactionV1({
-            contractName,
-            channelName,
-            params: ["name1", "symbol1", "8"],
-            methodName: "Initialize",
-            invocationType: FabricContractInvocationType.Send,
-            signingCredential: {
-              keychainId: CryptoMaterial.keychains.keychain1.id,
-              keychainRef: "userA",
-            },
-          });
-    
-          this.log.info(`Deployed chaincode on 2nd fabric network OK`);
         })
         .catch(() => console.log("trying to deploy fabric contract again"));
       retries++;

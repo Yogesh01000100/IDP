@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Hyperledger Cactus Example - Supply Chain App
- * Demonstrates how a business use case can be satisfied with Cactus when multiple distinct ledgers are involved.
+ * Hyperledger Cactus Example - Health Care EHR App
+ * Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.
  *
  * The version of the OpenAPI document: v2.0.0-alpha.2
  * 
@@ -23,232 +23,95 @@ import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
-
 /**
  * 
  * @export
- * @interface BambooHarvest
+ * @interface HospitalNetworkA
  */
-export interface BambooHarvest {
+export interface HospitalNetworkA {
     /**
      * 
      * @type {string}
-     * @memberof BambooHarvest
+     * @memberof HospitalNetworkA
      */
     'id': string;
     /**
-     * 
+     * The foreign key ID referencing the corresponding entry in HospitalNetworkB.
      * @type {string}
-     * @memberof BambooHarvest
+     * @memberof HospitalNetworkA
      */
-    'location': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof BambooHarvest
-     */
-    'startedAt': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof BambooHarvest
-     */
-    'endedAt': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof BambooHarvest
-     */
-    'harvester': string;
+    'HIdB': string;
 }
 /**
  * 
  * @export
- * @interface Bookshelf
+ * @interface HospitalNetworkB
  */
-export interface Bookshelf {
+export interface HospitalNetworkB {
     /**
      * 
      * @type {string}
-     * @memberof Bookshelf
+     * @memberof HospitalNetworkB
      */
     'id': string;
-    /**
-     * The number of shelves the bookshelf comes with.
-     * @type {number}
-     * @memberof Bookshelf
-     */
-    'shelfCount': number;
-    /**
-     * The foreign key ID referencing the bamboo harvest that yielded the wood material for the construction of the bookshelf.
-     * @type {string}
-     * @memberof Bookshelf
-     */
-    'bambooHarvestId': string;
 }
 /**
  * 
  * @export
- * @interface Shipment
+ * @interface InsertDataRequest
  */
-export interface Shipment {
+export interface InsertDataRequest {
     /**
      * 
-     * @type {string}
-     * @memberof Shipment
+     * @type {HospitalNetworkA}
+     * @memberof InsertDataRequest
      */
-    'id': string;
-    /**
-     * The foreign key ID referencing the bookshelfId that will go in the shipment.
-     * @type {string}
-     * @memberof Shipment
-     */
-    'bookshelfId': string;
-}
-
-
-
-
-
-
-
-
-
-
-/**
- * 
- * @export
- * @interface InsertBambooHarvestRequest
- */
-export interface InsertBambooHarvestRequest {
-    /**
-     * 
-     * @type {BambooHarvest}
-     * @memberof InsertBambooHarvestRequest
-     */
-    'bambooHarvest': BambooHarvest;
+    'data': HospitalNetworkA;
 }
 /**
  * 
  * @export
- * @interface InsertBambooHarvestResponse
+ * @interface InsertDataResponseHSPA
  */
-export interface InsertBambooHarvestResponse {
+export interface InsertDataResponseHSPA {
     /**
      * 
      * @type {{ [key: string]: any; }}
-     * @memberof InsertBambooHarvestResponse
+     * @memberof InsertDataResponseHSPA
      */
     'callOutput'?: { [key: string]: any; };
     /**
      * 
      * @type {{ [key: string]: any; }}
-     * @memberof InsertBambooHarvestResponse
+     * @memberof InsertDataResponseHSPA
      */
     'transactionReceipt'?: { [key: string]: any; };
 }
 /**
  * 
  * @export
- * @interface InsertBookshelfRequest
+ * @interface ListHSPAResponse
  */
-export interface InsertBookshelfRequest {
+export interface ListHSPAResponse {
     /**
      * 
-     * @type {Bookshelf}
-     * @memberof InsertBookshelfRequest
+     * @type {Array<HospitalNetworkA>}
+     * @memberof ListHSPAResponse
      */
-    'bookshelf': Bookshelf;
+    'data': Array<HospitalNetworkA>;
 }
 /**
  * 
  * @export
- * @interface InsertBookshelfResponse
+ * @interface ListHSPBResponse
  */
-export interface InsertBookshelfResponse {
+export interface ListHSPBResponse {
     /**
      * 
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertBookshelfResponse
+     * @type {Array<HospitalNetworkB>}
+     * @memberof ListHSPBResponse
      */
-    'callOutput'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertBookshelfResponse
-     */
-    'transactionReceipt'?: { [key: string]: any; };
-}
-/**
- * 
- * @export
- * @interface InsertShipmentRequest
- */
-export interface InsertShipmentRequest {
-    /**
-     * 
-     * @type {Shipment}
-     * @memberof InsertShipmentRequest
-     */
-    'shipment': Shipment;
-}
-/**
- * 
- * @export
- * @interface InsertShipmentResponse
- */
-export interface InsertShipmentResponse {
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertShipmentResponse
-     */
-    'callOutput'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertShipmentResponse
-     */
-    'transactionReceipt'?: { [key: string]: any; };
-}
-/**
- * 
- * @export
- * @interface ListBambooHarvestResponse
- */
-export interface ListBambooHarvestResponse {
-    /**
-     * 
-     * @type {Array<BambooHarvest>}
-     * @memberof ListBambooHarvestResponse
-     */
-    'data': Array<BambooHarvest>;
-}
-/**
- * 
- * @export
- * @interface ListBookshelfResponse
- */
-export interface ListBookshelfResponse {
-    /**
-     * 
-     * @type {Array<Bookshelf>}
-     * @memberof ListBookshelfResponse
-     */
-    'data': Array<Bookshelf>;
-}
-/**
- * 
- * @export
- * @interface ListShipmentResponse
- */
-export interface ListShipmentResponse {
-    /**
-     * 
-     * @type {Array<Shipment>}
-     * @memberof ListShipmentResponse
-     */
-    'data': Array<Shipment>;
+    'data': Array<HospitalNetworkB>;
 }
 
 /**
@@ -259,13 +122,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
     return {
         /**
          * 
-         * @summary Inserts the provided BambooHarvest entity to the ledger.
-         * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest] 
+         * @summary Inserts the provided data entity to the ledger.
+         * @param {InsertDataRequest} [insertDataRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        insertBambooHarvestV1: async (insertBambooHarvestRequest?: InsertBambooHarvestRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-bamboo-harvest`;
+        insertDataRequestV1: async (insertDataRequest?: InsertDataRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -284,7 +147,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(insertBambooHarvestRequest, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(insertDataRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -293,13 +156,12 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Inserts the provided Bookshelf entity to the ledger.
-         * @param {InsertBookshelfRequest} [insertBookshelfRequest] 
+         * @summary Lists all the Data entities stored on the ledger.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        insertBookshelfV1: async (insertBookshelfRequest?: InsertBookshelfRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-bookshelf`;
+        listDataV1: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -307,52 +169,15 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(insertBookshelfRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Inserts the provided Shipment entity to the ledger.
-         * @param {InsertShipmentRequest} [insertShipmentRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        insertShipmentV1: async (insertShipmentRequest?: InsertShipmentRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/insert-shipment`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(insertShipmentRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -365,68 +190,8 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listBambooHarvestV1: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-bamboo-harvest`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Lists all the Bookshelf entities stored on the ledger.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listBookshelfV1: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-bookshelf`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Lists all the Shipments entities stored on the ledger.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listShipmentV1: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-example-supply-chain-backend/list-shipment`;
+        listHSPBResponseV1: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -461,35 +226,23 @@ export const DefaultApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Inserts the provided BambooHarvest entity to the ledger.
-         * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest] 
+         * @summary Inserts the provided data entity to the ledger.
+         * @param {InsertDataRequest} [insertDataRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async insertBambooHarvestV1(insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertBambooHarvestResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.insertBambooHarvestV1(insertBambooHarvestRequest, options);
+        async insertDataRequestV1(insertDataRequest?: InsertDataRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertDataResponseHSPA>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.insertDataRequestV1(insertDataRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
          * 
-         * @summary Inserts the provided Bookshelf entity to the ledger.
-         * @param {InsertBookshelfRequest} [insertBookshelfRequest] 
+         * @summary Lists all the Data entities stored on the ledger.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async insertBookshelfV1(insertBookshelfRequest?: InsertBookshelfRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertBookshelfResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.insertBookshelfV1(insertBookshelfRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary Inserts the provided Shipment entity to the ledger.
-         * @param {InsertShipmentRequest} [insertShipmentRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async insertShipmentV1(insertShipmentRequest?: InsertShipmentRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertShipmentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.insertShipmentV1(insertShipmentRequest, options);
+        async listDataV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListHSPAResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listDataV1(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -498,28 +251,8 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listBambooHarvestV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListBambooHarvestResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listBambooHarvestV1(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary Lists all the Bookshelf entities stored on the ledger.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listBookshelfV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListBookshelfResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listBookshelfV1(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary Lists all the Shipments entities stored on the ledger.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listShipmentV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListShipmentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listShipmentV1(options);
+        async listHSPBResponseV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListHSPBResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listHSPBResponseV1(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -534,33 +267,22 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
     return {
         /**
          * 
-         * @summary Inserts the provided BambooHarvest entity to the ledger.
-         * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest] 
+         * @summary Inserts the provided data entity to the ledger.
+         * @param {InsertDataRequest} [insertDataRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        insertBambooHarvestV1(insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: any): AxiosPromise<InsertBambooHarvestResponse> {
-            return localVarFp.insertBambooHarvestV1(insertBambooHarvestRequest, options).then((request) => request(axios, basePath));
+        insertDataRequestV1(insertDataRequest?: InsertDataRequest, options?: any): AxiosPromise<InsertDataResponseHSPA> {
+            return localVarFp.insertDataRequestV1(insertDataRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary Inserts the provided Bookshelf entity to the ledger.
-         * @param {InsertBookshelfRequest} [insertBookshelfRequest] 
+         * @summary Lists all the Data entities stored on the ledger.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        insertBookshelfV1(insertBookshelfRequest?: InsertBookshelfRequest, options?: any): AxiosPromise<InsertBookshelfResponse> {
-            return localVarFp.insertBookshelfV1(insertBookshelfRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Inserts the provided Shipment entity to the ledger.
-         * @param {InsertShipmentRequest} [insertShipmentRequest] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        insertShipmentV1(insertShipmentRequest?: InsertShipmentRequest, options?: any): AxiosPromise<InsertShipmentResponse> {
-            return localVarFp.insertShipmentV1(insertShipmentRequest, options).then((request) => request(axios, basePath));
+        listDataV1(options?: any): AxiosPromise<ListHSPAResponse> {
+            return localVarFp.listDataV1(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -568,26 +290,8 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listBambooHarvestV1(options?: any): AxiosPromise<ListBambooHarvestResponse> {
-            return localVarFp.listBambooHarvestV1(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Lists all the Bookshelf entities stored on the ledger.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listBookshelfV1(options?: any): AxiosPromise<ListBookshelfResponse> {
-            return localVarFp.listBookshelfV1(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Lists all the Shipments entities stored on the ledger.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listShipmentV1(options?: any): AxiosPromise<ListShipmentResponse> {
-            return localVarFp.listShipmentV1(options).then((request) => request(axios, basePath));
+        listHSPBResponseV1(options?: any): AxiosPromise<ListHSPBResponse> {
+            return localVarFp.listHSPBResponseV1(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -601,38 +305,25 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
 export class DefaultApi extends BaseAPI {
     /**
      * 
-     * @summary Inserts the provided BambooHarvest entity to the ledger.
-     * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest] 
+     * @summary Inserts the provided data entity to the ledger.
+     * @param {InsertDataRequest} [insertDataRequest] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public insertBambooHarvestV1(insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).insertBambooHarvestV1(insertBambooHarvestRequest, options).then((request) => request(this.axios, this.basePath));
+    public insertDataRequestV1(insertDataRequest?: InsertDataRequest, options?: AxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).insertDataRequestV1(insertDataRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary Inserts the provided Bookshelf entity to the ledger.
-     * @param {InsertBookshelfRequest} [insertBookshelfRequest] 
+     * @summary Lists all the Data entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public insertBookshelfV1(insertBookshelfRequest?: InsertBookshelfRequest, options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).insertBookshelfV1(insertBookshelfRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Inserts the provided Shipment entity to the ledger.
-     * @param {InsertShipmentRequest} [insertShipmentRequest] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public insertShipmentV1(insertShipmentRequest?: InsertShipmentRequest, options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).insertShipmentV1(insertShipmentRequest, options).then((request) => request(this.axios, this.basePath));
+    public listDataV1(options?: AxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).listDataV1(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -642,30 +333,8 @@ export class DefaultApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public listBambooHarvestV1(options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).listBambooHarvestV1(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Lists all the Bookshelf entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public listBookshelfV1(options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).listBookshelfV1(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Lists all the Shipments entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public listShipmentV1(options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).listShipmentV1(options).then((request) => request(this.axios, this.basePath));
+    public listHSPBResponseV1(options?: AxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).listHSPBResponseV1(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

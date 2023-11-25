@@ -20,10 +20,12 @@ export interface IHealthCareInfrastructureOptions {
 }
 export declare class HealthCareAppDummyInfrastructure {
     readonly options: IHealthCareInfrastructureOptions;
+    static readonly CLASS_NAME = "HealthCareAppDummyInfrastructure";
+    static readonly FABRIC_2_AIO_CLI_CFG_DIR = "/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/";
     private readonly fabric1;
     private readonly fabric2;
     private readonly log;
-    static readonly FABRIC_2_AIO_CLI_CFG_DIR = "/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/";
+    get className(): string;
     get orgCfgDir(): string;
     constructor(options: IHealthCareInfrastructureOptions);
     get org1Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x;

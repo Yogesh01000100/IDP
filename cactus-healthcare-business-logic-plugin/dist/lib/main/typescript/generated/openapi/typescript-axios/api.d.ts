@@ -1,6 +1,6 @@
 /**
- * Hyperledger Cactus Example - Supply Chain App
- * Demonstrates how a business use case can be satisfied with Cactus when multiple distinct ledgers are involved.
+ * Hyperledger Cactus Example - Health Care EHR App
+ * Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.
  *
  * The version of the OpenAPI document: v2.0.0-alpha.2
  *
@@ -16,107 +16,58 @@ import { BaseAPI } from './base';
 /**
  *
  * @export
- * @interface BambooHarvest
+ * @interface HospitalNetworkA
  */
-export interface BambooHarvest {
+export interface HospitalNetworkA {
     /**
      *
      * @type {string}
-     * @memberof BambooHarvest
+     * @memberof HospitalNetworkA
      */
     'id': string;
     /**
-     *
+     * The foreign key ID referencing the corresponding entry in HospitalNetworkB.
      * @type {string}
-     * @memberof BambooHarvest
+     * @memberof HospitalNetworkA
      */
-    'location': string;
-    /**
-     *
-     * @type {string}
-     * @memberof BambooHarvest
-     */
-    'startedAt': string;
-    /**
-     *
-     * @type {string}
-     * @memberof BambooHarvest
-     */
-    'endedAt': string;
-    /**
-     *
-     * @type {string}
-     * @memberof BambooHarvest
-     */
-    'harvester': string;
+    'HIdB': string;
 }
 /**
  *
  * @export
- * @interface Bookshelf
+ * @interface HospitalNetworkB
  */
-export interface Bookshelf {
+export interface HospitalNetworkB {
     /**
      *
      * @type {string}
-     * @memberof Bookshelf
+     * @memberof HospitalNetworkB
      */
     'id': string;
-    /**
-     * The number of shelves the bookshelf comes with.
-     * @type {number}
-     * @memberof Bookshelf
-     */
-    'shelfCount': number;
-    /**
-     * The foreign key ID referencing the bamboo harvest that yielded the wood material for the construction of the bookshelf.
-     * @type {string}
-     * @memberof Bookshelf
-     */
-    'bambooHarvestId': string;
 }
 /**
  *
  * @export
- * @interface Shipment
+ * @interface InsertDataRequest
  */
-export interface Shipment {
+export interface InsertDataRequest {
     /**
      *
-     * @type {string}
-     * @memberof Shipment
+     * @type {HospitalNetworkA}
+     * @memberof InsertDataRequest
      */
-    'id': string;
-    /**
-     * The foreign key ID referencing the bookshelfId that will go in the shipment.
-     * @type {string}
-     * @memberof Shipment
-     */
-    'bookshelfId': string;
+    'data': HospitalNetworkA;
 }
 /**
  *
  * @export
- * @interface InsertBambooHarvestRequest
+ * @interface InsertDataResponseHSPA
  */
-export interface InsertBambooHarvestRequest {
-    /**
-     *
-     * @type {BambooHarvest}
-     * @memberof InsertBambooHarvestRequest
-     */
-    'bambooHarvest': BambooHarvest;
-}
-/**
- *
- * @export
- * @interface InsertBambooHarvestResponse
- */
-export interface InsertBambooHarvestResponse {
+export interface InsertDataResponseHSPA {
     /**
      *
      * @type {{ [key: string]: any; }}
-     * @memberof InsertBambooHarvestResponse
+     * @memberof InsertDataResponseHSPA
      */
     'callOutput'?: {
         [key: string]: any;
@@ -124,7 +75,7 @@ export interface InsertBambooHarvestResponse {
     /**
      *
      * @type {{ [key: string]: any; }}
-     * @memberof InsertBambooHarvestResponse
+     * @memberof InsertDataResponseHSPA
      */
     'transactionReceipt'?: {
         [key: string]: any;
@@ -133,113 +84,28 @@ export interface InsertBambooHarvestResponse {
 /**
  *
  * @export
- * @interface InsertBookshelfRequest
+ * @interface ListHSPAResponse
  */
-export interface InsertBookshelfRequest {
+export interface ListHSPAResponse {
     /**
      *
-     * @type {Bookshelf}
-     * @memberof InsertBookshelfRequest
+     * @type {Array<HospitalNetworkA>}
+     * @memberof ListHSPAResponse
      */
-    'bookshelf': Bookshelf;
+    'data': Array<HospitalNetworkA>;
 }
 /**
  *
  * @export
- * @interface InsertBookshelfResponse
+ * @interface ListHSPBResponse
  */
-export interface InsertBookshelfResponse {
+export interface ListHSPBResponse {
     /**
      *
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertBookshelfResponse
+     * @type {Array<HospitalNetworkB>}
+     * @memberof ListHSPBResponse
      */
-    'callOutput'?: {
-        [key: string]: any;
-    };
-    /**
-     *
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertBookshelfResponse
-     */
-    'transactionReceipt'?: {
-        [key: string]: any;
-    };
-}
-/**
- *
- * @export
- * @interface InsertShipmentRequest
- */
-export interface InsertShipmentRequest {
-    /**
-     *
-     * @type {Shipment}
-     * @memberof InsertShipmentRequest
-     */
-    'shipment': Shipment;
-}
-/**
- *
- * @export
- * @interface InsertShipmentResponse
- */
-export interface InsertShipmentResponse {
-    /**
-     *
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertShipmentResponse
-     */
-    'callOutput'?: {
-        [key: string]: any;
-    };
-    /**
-     *
-     * @type {{ [key: string]: any; }}
-     * @memberof InsertShipmentResponse
-     */
-    'transactionReceipt'?: {
-        [key: string]: any;
-    };
-}
-/**
- *
- * @export
- * @interface ListBambooHarvestResponse
- */
-export interface ListBambooHarvestResponse {
-    /**
-     *
-     * @type {Array<BambooHarvest>}
-     * @memberof ListBambooHarvestResponse
-     */
-    'data': Array<BambooHarvest>;
-}
-/**
- *
- * @export
- * @interface ListBookshelfResponse
- */
-export interface ListBookshelfResponse {
-    /**
-     *
-     * @type {Array<Bookshelf>}
-     * @memberof ListBookshelfResponse
-     */
-    'data': Array<Bookshelf>;
-}
-/**
- *
- * @export
- * @interface ListShipmentResponse
- */
-export interface ListShipmentResponse {
-    /**
-     *
-     * @type {Array<Shipment>}
-     * @memberof ListShipmentResponse
-     */
-    'data': Array<Shipment>;
+    'data': Array<HospitalNetworkB>;
 }
 /**
  * DefaultApi - axios parameter creator
@@ -248,49 +114,26 @@ export interface ListShipmentResponse {
 export declare const DefaultApiAxiosParamCreator: (configuration?: Configuration) => {
     /**
      *
-     * @summary Inserts the provided BambooHarvest entity to the ledger.
-     * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest]
+     * @summary Inserts the provided data entity to the ledger.
+     * @param {InsertDataRequest} [insertDataRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    insertBambooHarvestV1: (insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: AxiosRequestConfig) => Promise<RequestArgs>;
+    insertDataRequestV1: (insertDataRequest?: InsertDataRequest, options?: AxiosRequestConfig) => Promise<RequestArgs>;
     /**
      *
-     * @summary Inserts the provided Bookshelf entity to the ledger.
-     * @param {InsertBookshelfRequest} [insertBookshelfRequest]
+     * @summary Lists all the Data entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    insertBookshelfV1: (insertBookshelfRequest?: InsertBookshelfRequest, options?: AxiosRequestConfig) => Promise<RequestArgs>;
-    /**
-     *
-     * @summary Inserts the provided Shipment entity to the ledger.
-     * @param {InsertShipmentRequest} [insertShipmentRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    insertShipmentV1: (insertShipmentRequest?: InsertShipmentRequest, options?: AxiosRequestConfig) => Promise<RequestArgs>;
+    listDataV1: (options?: AxiosRequestConfig) => Promise<RequestArgs>;
     /**
      *
      * @summary Lists all the BambooHarvest entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listBambooHarvestV1: (options?: AxiosRequestConfig) => Promise<RequestArgs>;
-    /**
-     *
-     * @summary Lists all the Bookshelf entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listBookshelfV1: (options?: AxiosRequestConfig) => Promise<RequestArgs>;
-    /**
-     *
-     * @summary Lists all the Shipments entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listShipmentV1: (options?: AxiosRequestConfig) => Promise<RequestArgs>;
+    listHSPBResponseV1: (options?: AxiosRequestConfig) => Promise<RequestArgs>;
 };
 /**
  * DefaultApi - functional programming interface
@@ -299,49 +142,26 @@ export declare const DefaultApiAxiosParamCreator: (configuration?: Configuration
 export declare const DefaultApiFp: (configuration?: Configuration) => {
     /**
      *
-     * @summary Inserts the provided BambooHarvest entity to the ledger.
-     * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest]
+     * @summary Inserts the provided data entity to the ledger.
+     * @param {InsertDataRequest} [insertDataRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    insertBambooHarvestV1(insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertBambooHarvestResponse>>;
+    insertDataRequestV1(insertDataRequest?: InsertDataRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertDataResponseHSPA>>;
     /**
      *
-     * @summary Inserts the provided Bookshelf entity to the ledger.
-     * @param {InsertBookshelfRequest} [insertBookshelfRequest]
+     * @summary Lists all the Data entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    insertBookshelfV1(insertBookshelfRequest?: InsertBookshelfRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertBookshelfResponse>>;
-    /**
-     *
-     * @summary Inserts the provided Shipment entity to the ledger.
-     * @param {InsertShipmentRequest} [insertShipmentRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    insertShipmentV1(insertShipmentRequest?: InsertShipmentRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InsertShipmentResponse>>;
+    listDataV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListHSPAResponse>>;
     /**
      *
      * @summary Lists all the BambooHarvest entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listBambooHarvestV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListBambooHarvestResponse>>;
-    /**
-     *
-     * @summary Lists all the Bookshelf entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listBookshelfV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListBookshelfResponse>>;
-    /**
-     *
-     * @summary Lists all the Shipments entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listShipmentV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListShipmentResponse>>;
+    listHSPBResponseV1(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListHSPBResponse>>;
 };
 /**
  * DefaultApi - factory interface
@@ -350,49 +170,26 @@ export declare const DefaultApiFp: (configuration?: Configuration) => {
 export declare const DefaultApiFactory: (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) => {
     /**
      *
-     * @summary Inserts the provided BambooHarvest entity to the ledger.
-     * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest]
+     * @summary Inserts the provided data entity to the ledger.
+     * @param {InsertDataRequest} [insertDataRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    insertBambooHarvestV1(insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: any): AxiosPromise<InsertBambooHarvestResponse>;
+    insertDataRequestV1(insertDataRequest?: InsertDataRequest, options?: any): AxiosPromise<InsertDataResponseHSPA>;
     /**
      *
-     * @summary Inserts the provided Bookshelf entity to the ledger.
-     * @param {InsertBookshelfRequest} [insertBookshelfRequest]
+     * @summary Lists all the Data entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    insertBookshelfV1(insertBookshelfRequest?: InsertBookshelfRequest, options?: any): AxiosPromise<InsertBookshelfResponse>;
-    /**
-     *
-     * @summary Inserts the provided Shipment entity to the ledger.
-     * @param {InsertShipmentRequest} [insertShipmentRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    insertShipmentV1(insertShipmentRequest?: InsertShipmentRequest, options?: any): AxiosPromise<InsertShipmentResponse>;
+    listDataV1(options?: any): AxiosPromise<ListHSPAResponse>;
     /**
      *
      * @summary Lists all the BambooHarvest entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listBambooHarvestV1(options?: any): AxiosPromise<ListBambooHarvestResponse>;
-    /**
-     *
-     * @summary Lists all the Bookshelf entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listBookshelfV1(options?: any): AxiosPromise<ListBookshelfResponse>;
-    /**
-     *
-     * @summary Lists all the Shipments entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listShipmentV1(options?: any): AxiosPromise<ListShipmentResponse>;
+    listHSPBResponseV1(options?: any): AxiosPromise<ListHSPBResponse>;
 };
 /**
  * DefaultApi - object-oriented interface
@@ -403,31 +200,21 @@ export declare const DefaultApiFactory: (configuration?: Configuration, basePath
 export declare class DefaultApi extends BaseAPI {
     /**
      *
-     * @summary Inserts the provided BambooHarvest entity to the ledger.
-     * @param {InsertBambooHarvestRequest} [insertBambooHarvestRequest]
+     * @summary Inserts the provided data entity to the ledger.
+     * @param {InsertDataRequest} [insertDataRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    insertBambooHarvestV1(insertBambooHarvestRequest?: InsertBambooHarvestRequest, options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<InsertBambooHarvestResponse, any>>;
+    insertDataRequestV1(insertDataRequest?: InsertDataRequest, options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<InsertDataResponseHSPA, any>>;
     /**
      *
-     * @summary Inserts the provided Bookshelf entity to the ledger.
-     * @param {InsertBookshelfRequest} [insertBookshelfRequest]
+     * @summary Lists all the Data entities stored on the ledger.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    insertBookshelfV1(insertBookshelfRequest?: InsertBookshelfRequest, options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<InsertBookshelfResponse, any>>;
-    /**
-     *
-     * @summary Inserts the provided Shipment entity to the ledger.
-     * @param {InsertShipmentRequest} [insertShipmentRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    insertShipmentV1(insertShipmentRequest?: InsertShipmentRequest, options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<InsertShipmentResponse, any>>;
+    listDataV1(options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<ListHSPAResponse, any>>;
     /**
      *
      * @summary Lists all the BambooHarvest entities stored on the ledger.
@@ -435,21 +222,5 @@ export declare class DefaultApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    listBambooHarvestV1(options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<ListBambooHarvestResponse, any>>;
-    /**
-     *
-     * @summary Lists all the Bookshelf entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    listBookshelfV1(options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<ListBookshelfResponse, any>>;
-    /**
-     *
-     * @summary Lists all the Shipments entities stored on the ledger.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    listShipmentV1(options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<ListShipmentResponse, any>>;
+    listHSPBResponseV1(options?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<ListHSPBResponse, any>>;
 }

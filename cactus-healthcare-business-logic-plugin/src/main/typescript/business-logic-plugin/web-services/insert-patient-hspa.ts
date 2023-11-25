@@ -14,7 +14,7 @@ import {
   IWebServiceEndpoint,
 } from "@hyperledger/cactus-core-api";
 import { registerWebServiceEndpoint } from "@hyperledger/cactus-core";
-import { InsertShipmentRequest } from "../../generated/openapi/typescript-axios/index"; // to be modified
+import { InsertDataRequest } from "../../generated/openapi/typescript-axios/index"; // to be modified
 import {
   DefaultApi as FabricApi,
   FabricContractInvocationType,
@@ -95,8 +95,8 @@ export class InsertDataHspA implements IWebServiceEndpoint {
     // main handling of the req for creating patient data
     const tag = `${this.getVerbLowerCase().toUpperCase()} ${this.getPath()}`;
     try {
-      const { shipment } = req.body as InsertShipmentRequest; //  change InsertShipmentRequest
-      this.log.debug(`${tag} %o`, shipment);
+      const { data } = req.body as InsertDataRequest; //  change InsertShipmentRequest
+      this.log.debug(`${tag} %o`, data);
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
@@ -106,7 +106,7 @@ export class InsertDataHspA implements IWebServiceEndpoint {
         contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Send,
         methodName: "CreatePatientRecord",
-        params: [shipment.id, shipment.bookshelfId], // here the chaincode has to be updated in order to match the param structure
+        params: [data.id, data.HIdB], // here the chaincode has to be updated in order to match the param structure
       };
       const {
         data: { functionOutput },

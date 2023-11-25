@@ -19,4 +19,4 @@ var healthcare_cactus_plugin_1 = require("./business-logic-plugin/healthcare-cac
 Object.defineProperty(exports, "HealthCareCactusPlugin", { enumerable: true, get: function () { return healthcare_cactus_plugin_1.HealthCareCactusPlugin; } });
 //to be updated
 __exportStar(require("./generated/openapi/typescript-axios/index"), exports);
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljLWFwaS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy9tYWluL3R5cGVzY3JpcHQvcHVibGljLWFwaS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLDZGQUk0RDtBQUZ4RCxrSUFBQSxzQkFBc0IsT0FBQTtBQVN4QixlQUFlO0FBQ2YsNkVBQTJEIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljLWFwaS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy9tYWluL3R5cGVzY3JpcHQvcHVibGljLWFwaS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLDZGQUkwRDtBQUZ4RCxrSUFBQSxzQkFBc0IsT0FBQTtBQU94QixlQUFlO0FBQ2YsNkVBQTJEIn0=

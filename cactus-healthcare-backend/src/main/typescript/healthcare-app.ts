@@ -74,13 +74,6 @@ export class HealthCareApp {
     const fabricApiClient1 = new FabricApi(new Configuration({ basePath: nodeApiHostA }));
     const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));
 
-    this.log.info("Deploying chaincode...");
-
-    // Deploy contracts on both Fabric networks
-    await this.infrastructure.deployFabricContract1(fabricApiClient1); // return type mismatch
-    await this.infrastructure.deployFabricContract2(fabricApiClient2);
-
-    this.log.info(`Chaincode deployed.`);
 
     const clientPluginRegistry = new PluginRegistry({
       plugins: [
@@ -120,6 +113,13 @@ export class HealthCareApp {
 
     const apiServer1 = await this.startNode(httpApiA, clientPluginRegistry);
     const apiServer2 = await this.startNode(httpApiB, serverPluginRegistry);
+    
+    this.log.info("Deploying chaincode..."); // problem solved here
+
+    await this.infrastructure.deployFabricContract1(fabricApiClient1);
+    await this.infrastructure.deployFabricContract2(fabricApiClient2);
+
+    this.log.info(`Chaincode deployed.`);
 
     return {
       apiServer1,

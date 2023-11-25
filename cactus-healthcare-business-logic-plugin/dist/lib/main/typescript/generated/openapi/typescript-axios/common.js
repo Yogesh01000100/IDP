@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Hyperledger Cactus Example - Supply Chain App
- * Demonstrates how a business use case can be satisfied with Cactus when multiple distinct ledgers are involved.
+ * Hyperledger Cactus Example - Health Care EHR App
+ * Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.
  *
  * The version of the OpenAPI document: v2.0.0-alpha.2
  *

@@ -52,7 +52,7 @@ export async function launchApp(
         await App.start();
         console.info("HealthCareApp running...");
     } catch (ex) {
-        console.error(`HealthCareApp crashed. Existing...`, ex);
+        console.error(`HealthCareApp crashed. Exiting...`, ex);
         await App.stop();
         process.exit(-1);
     }

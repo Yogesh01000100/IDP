@@ -4,4 +4,3 @@ export interface IHealthCareContractDeploymentInfo {
   sourceRepository: IFabricContractDeployment;
   destinationRepository: IFabricContractDeployment;
 }
-
