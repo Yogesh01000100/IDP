@@ -16,7 +16,10 @@ import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory
 import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
-// possible errors
+
+
+
+// [for fab net -1] possible errors
 export const org1Env= {
   CORE_PEER_LOCALMSPID: "Org1MSP",
   CORE_PEER_ADDRESS: "peer0.org1.example.com:7051",
@@ -27,10 +30,23 @@ export const org1Env= {
   ORDERER_TLS_ROOTCERT_FILE:
     "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 };
-// possible errors
-export const org2Env= {
+// [for fab net -1] possible errors
+export const org2Env = {
+  CORE_PEER_LOCALMSPID: "Org2MSP", // Corrected MSP ID for Org2
+  CORE_PEER_ADDRESS: "peer0.org2.example.com:9051", // Ensure this address is correct for Org2's peer
+  CORE_PEER_MSPCONFIGPATH:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org1.example.com/msp", // Path to Org2's MSP configuration
+  CORE_PEER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt", // Path to Org2's TLS root certificate
+  ORDERER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem", // Ensure this is the correct path for the orderer's TLS root certificate
+};
+
+
+// [for fab net -2] possible errors
+export const org3Env= {
   CORE_PEER_LOCALMSPID: "Org1MSP",
-  CORE_PEER_ADDRESS: "peer0.org2.example.com:9151",
+  CORE_PEER_ADDRESS: "peer0.org1.example.com:8001",
   CORE_PEER_MSPCONFIGPATH:
     "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
   CORE_PEER_TLS_ROOTCERT_FILE:
@@ -38,6 +54,18 @@ export const org2Env= {
   ORDERER_TLS_ROOTCERT_FILE:
     "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 };
+// [for fab net -2] possible errors
+export const org4Env = {
+  CORE_PEER_LOCALMSPID: "Org2MSP", // Corrected MSP ID for Org2
+  CORE_PEER_ADDRESS: "peer0.org2.example.com:10004", // Ensure this address is correct for Org2's peer
+  CORE_PEER_MSPCONFIGPATH:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org1.example.com/msp", // Path to Org2's MSP configuration
+  CORE_PEER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt", // Path to Org2's TLS root certificate
+  ORDERER_TLS_ROOTCERT_FILE:
+    "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem", // Ensure this is the correct path for the orderer's TLS root certificate
+};
+
 
 export interface IHealthCareInfrastructureOptions {
   logLevel?: LogLevelDesc;
@@ -78,7 +106,7 @@ export class HealthCareAppDummyInfrastructure {
       logLevel: level || "DEBUG",
     });
 
-    this.fabric2 = new FabricTestLedgerV2({ 
+    this.fabric2 = new FabricTestLedgerV2({ // change this
       publishAllPorts: true,
       imageName: DEFAULT_FABRIC_2_AIO_IMAGE_NAME_V2,
       imageVersion: DEFAULT_FABRIC_2_AIO_IMAGE_VERSION_V2,
@@ -89,7 +117,6 @@ export class HealthCareAppDummyInfrastructure {
     });
   }
 
-  // org1Env possible cause for errors
   public get org1Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x {
     return {
       CORE_LOGGING_LEVEL: "debug",
@@ -107,7 +134,6 @@ export class HealthCareAppDummyInfrastructure {
     };
   }
 
-  // org2Env  possible cause for errors
   public get org2Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x {
     return {
       CORE_LOGGING_LEVEL: "debug",
@@ -118,7 +144,41 @@ export class HealthCareAppDummyInfrastructure {
       CORE_PEER_TLS_ENABLED: "true",
       ORDERER_CA: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
 
-      CORE_PEER_ADDRESS: "peer0.org2.example.com:9151",
+      CORE_PEER_ADDRESS: "peer0.org2.example.com:9051",
+      CORE_PEER_MSPCONFIGPATH: `${this.orgCfgDir}peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp`,
+      CORE_PEER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt`,
+      ORDERER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
+    };
+  }
+
+  public get org3Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x {
+    return {
+      CORE_LOGGING_LEVEL: "debug",
+      FABRIC_LOGGING_SPEC: "debug",
+      CORE_PEER_LOCALMSPID: "Org1MSP",
+
+      ORDERER_CA: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
+
+      FABRIC_CFG_PATH: "/etc/hyperledger/fabric",
+      CORE_PEER_TLS_ENABLED: "true",
+      CORE_PEER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt`,
+      CORE_PEER_MSPCONFIGPATH: `${this.orgCfgDir}peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp`,
+      CORE_PEER_ADDRESS: "peer0.org1.example.com:8001",
+      ORDERER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
+    };
+  }
+
+  public get org4Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x {
+    return {
+      CORE_LOGGING_LEVEL: "debug",
+      FABRIC_LOGGING_SPEC: "debug",
+      CORE_PEER_LOCALMSPID: "Org2MSP",
+
+      FABRIC_CFG_PATH: "/etc/hyperledger/fabric",
+      CORE_PEER_TLS_ENABLED: "true",
+      ORDERER_CA: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
+
+      CORE_PEER_ADDRESS: "peer0.org2.example.com:10004",
       CORE_PEER_MSPCONFIGPATH: `${this.orgCfgDir}peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp`,
       CORE_PEER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt`,
       ORDERER_TLS_ROOTCERT_FILE: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
@@ -129,8 +189,7 @@ export class HealthCareAppDummyInfrastructure {
     try {
       this.log.info(`Starting Healthcare infrastructure...`);
       await Promise.all([
-        this.fabric1.start(),
-        this.fabric2.start(),
+        this.fabric1.start()
       ]);
       this.log.info(`Started Healthcare infrastructure OK`);
     } catch (ex) {
@@ -143,8 +202,7 @@ export class HealthCareAppDummyInfrastructure {
     try {
       this.log.info(`Stopping...`);
       await Promise.all([
-        this.fabric1.stop().then(() => this.fabric1.destroy()),
-        this.fabric2.stop().then(() => this.fabric2.destroy()),
+        this.fabric1.stop().then(() => this.fabric1.destroy())
       ]);
       this.log.info(`Stopped OK`);
     } catch (ex) {
@@ -153,7 +211,6 @@ export class HealthCareAppDummyInfrastructure {
     }
   }
 
-  // Example method: Creating a ledger connector for the first Fabric network
   public async createFabric1LedgerConnector(): Promise<PluginLedgerConnectorFabric> {
     const connectionProfileOrg1 = await this.fabric1.getConnectionProfileOrg1();
     const enrollAdminOutOrg1 = await this.fabric1.enrollAdminV2({
@@ -227,35 +284,35 @@ export class HealthCareAppDummyInfrastructure {
     });
   }
 
-  // Example method: Creating a ledger connector for the second Fabric network
+  // possible errors
   public async createFabric2LedgerConnector(): Promise<PluginLedgerConnectorFabric> {
     const connectionProfileOrg1 = await this.fabric2.getConnectionProfileOrg1();
-    const enrollAdminOutOrg1 = await this.fabric2.enrollAdminV2({
+    const enrollAdminOutOrg1 = await this.fabric1.enrollAdminV2({
       organization: "org1",
     });
     const adminWalletOrg1 = enrollAdminOutOrg1[1];
-    const [userIdentity1] = await this.fabric2.enrollUserV2({
+    const [userIdentity1] = await this.fabric1.enrollUserV2({
       wallet: adminWalletOrg1,
       enrollmentID: "userA",
       organization: "org1",
     });
-    const [userIdentity2] = await this.fabric2.enrollUserV2({
+    const [userIdentity2] = await this.fabric1.enrollUserV2({
       wallet: adminWalletOrg1,
       enrollmentID: "userB",
       organization: "org1",
     });
 
-    const enrollAdminOutOrg2 = await this.fabric2.enrollAdminV2({
+    const enrollAdminOutOrg2 = await this.fabric1.enrollAdminV2({
       organization: "org2",
     });
     const adminWalletOrg2 = enrollAdminOutOrg2[1];
-    const [bridgeIdentity] = await this.fabric2.enrollUserV2({
+    const [bridgeIdentity] = await this.fabric1.enrollUserV2({
       wallet: adminWalletOrg2,
       enrollmentID: "bridge",
       organization: "org2",
     });
 
-    const sshConfig = await this.fabric2.getSshConfig();
+    const sshConfig = await this.fabric1.getSshConfig();
 
     const keychainEntryKey1 = "userA";
     const keychainEntryValue1 = JSON.stringify(userIdentity1);
@@ -279,14 +336,14 @@ export class HealthCareAppDummyInfrastructure {
 
     const pluginRegistry = new PluginRegistry({ plugins: [keychainPlugin] });
 
-    this.log.info(`Creating Fabric Connector...`);
+    this.log.info(`Creating Fabric Connector 2...`);
     return new PluginLedgerConnectorFabric({
       instanceId: uuidv4(),
-      dockerBinary: "/usr/local/bin/docker",
-      peerBinary: "/fabric-samples/bin/peer",
-      goBinary: "/usr/local/go/bin/go",
+      dockerBinary: "/usr/local/bin/docker", // changes req 
+      peerBinary: "/fabric-samples/bin/peer", // changes req 
+      goBinary: "/usr/local/go/bin/go", // changes req 
       pluginRegistry,
-      cliContainerEnv: this.org2Env,
+      cliContainerEnv: this.org3Env,
       sshConfig,
       connectionProfile: connectionProfileOrg1,
       logLevel: this.options.logLevel || "INFO",
@@ -301,7 +358,7 @@ export class HealthCareAppDummyInfrastructure {
     });
   }
   
-  // smart contract deployment in fabric network
+  // chaincode deployment in both networks
   public async deployFabricContract1(
     fabricApiClient: FabricApi,
   ): Promise<void>{
@@ -362,7 +419,7 @@ export class HealthCareAppDummyInfrastructure {
     this.log.info("File paths navigated...");
     let retries = 0;
     while (retries <= 5) {
-      this.log.info("Inside loop... count :", retries);
+      this.log.info("Inside while loop count number :", retries);
       await fabricApiClient
         .deployContractV1(
           {
@@ -370,7 +427,7 @@ export class HealthCareAppDummyInfrastructure {
             ccVersion: "1.0.0",
             sourceFiles,
             ccName: contractName,
-            targetOrganizations: [this.org1Env, this.org2Env],
+            targetOrganizations: [this.org1Env,this.org2Env],
             caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
             ccLabel: "EHRContract",
             ccLang: ChainCodeProgrammingLanguage.Typescript,
@@ -431,6 +488,7 @@ export class HealthCareAppDummyInfrastructure {
   ): Promise<void>{
 
     this.log.info("Inside deployFabricContract2...");
+
     const channelId = "mychannel";
 
     const contractName = "EHRContract";
@@ -473,7 +531,7 @@ export class HealthCareAppDummyInfrastructure {
       });
     }
     {
-      const filename = "./contract.ts";
+      const filename = "./EHR.ts";
       const relativePath = "./src/";
       const filePath = path.join(contractDir, relativePath, filename);
       const buffer = await fs.readFile(filePath);
@@ -486,7 +544,7 @@ export class HealthCareAppDummyInfrastructure {
     this.log.info("File paths navigated...");
     let retries = 0;
     while (retries <= 5) {
-      this.log.info("Inside loop... count :", retries);
+      this.log.info("Inside while loop count number :", retries);
       await fabricApiClient
         .deployContractV1(
           {
@@ -494,12 +552,12 @@ export class HealthCareAppDummyInfrastructure {
             ccVersion: "1.0.0",
             sourceFiles,
             ccName: contractName,
-            targetOrganizations: [this.org1Env, this.org2Env], // change the organisation port
+            targetOrganizations: [this.org3Env,this.org4Env],
             caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
-            ccLabel: "HealthCareEHR",
+            ccLabel: "EHRContract",
             ccLang: ChainCodeProgrammingLanguage.Typescript,
             ccSequence: 1,
-            orderer: "orderer.example.com:7150",
+            orderer: "orderer.example.com:8000",
             ordererTLSHostnameOverride: "orderer.example.com",
             connTimeout: 120,
           },

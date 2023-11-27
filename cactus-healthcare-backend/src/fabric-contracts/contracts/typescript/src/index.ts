@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EHRContract } from "./EHR";
+import { EHRContract } from "../src/EHR";
 
-export { EHRContract } from "./EHR";
+export { EHRContract } from "../src/EHR";
 
-export const contract: any[] = [EHRContract];
+export const contracts: any[] = [EHRContract];

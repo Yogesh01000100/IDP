@@ -95,7 +95,7 @@ export class InsertDataHspA implements IWebServiceEndpoint {
     // main handling of the req for creating patient data
     const tag = `${this.getVerbLowerCase().toUpperCase()} ${this.getPath()}`;
     try {
-      const { data } = req.body as InsertDataRequest; //  change InsertShipmentRequest
+      const { data } = req.body as InsertDataRequest;
       this.log.debug(`${tag} %o`, data);
       const request: RunTransactionRequest = {
         signingCredential: {

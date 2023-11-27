@@ -59,7 +59,7 @@ export class HealthCareApp {
     await this.infrastructure.start();
     this.onShutdown(() => this.infrastructure.stop());
 
-    const fabricPlugin1 = await this.infrastructure.createFabric1LedgerConnector(); // find this function: createFabric1LedgerConnector
+    const fabricPlugin1 = await this.infrastructure.createFabric1LedgerConnector();
     const fabricPlugin2 = await this.infrastructure.createFabric2LedgerConnector();
 
     // Reserve the ports where the API Servers will run
@@ -72,10 +72,10 @@ export class HealthCareApp {
     const nodeApiHostB = `http://${this.options.apiHost}:${addressInfoB.port}`;
 
     const fabricApiClient1 = new FabricApi(new Configuration({ basePath: nodeApiHostA }));
-    const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));
+    const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));// done
 
-
-    const clientPluginRegistry = new PluginRegistry({
+    // to be done
+    const FabricRegistry1 = new PluginRegistry({
       plugins: [
         new PluginKeychainMemory({
           keychainId: CryptoMaterial.keychains.keychain1.id,
@@ -87,13 +87,13 @@ export class HealthCareApp {
           logLevel: "INFO",
           instanceId: uuidv4(),
           fabricApiClient1,  
-          fabricApiClient2,
-          fabricEnvironment: org1Env,
+          fabricApiClient2
+          //fabricEnvironment: org1Env,
         }),
       ],
     });
 
-    const serverPluginRegistry = new PluginRegistry({
+    const FabricRegistry2 = new PluginRegistry({
       plugins: [
         new PluginKeychainMemory({
           keychainId: CryptoMaterial.keychains.keychain2.id,
@@ -105,16 +105,16 @@ export class HealthCareApp {
           logLevel: "INFO",
           instanceId: uuidv4(),
           fabricApiClient1,
-          fabricApiClient2,
-          fabricEnvironment: org2Env,
+          fabricApiClient2
+          //fabricEnvironment: org2Env,
         }),
       ],
     });
 
-    const apiServer1 = await this.startNode(httpApiA, clientPluginRegistry);
-    const apiServer2 = await this.startNode(httpApiB, serverPluginRegistry);
+    const apiServer1 = await this.startNode(httpApiA, FabricRegistry1);
+    const apiServer2 = await this.startNode(httpApiB, FabricRegistry2);
     
-    this.log.info("Deploying chaincode..."); // problem solved here
+    this.log.info("Deploying chaincode...");
 
     await this.infrastructure.deployFabricContract1(fabricApiClient1);
     await this.infrastructure.deployFabricContract2(fabricApiClient2);

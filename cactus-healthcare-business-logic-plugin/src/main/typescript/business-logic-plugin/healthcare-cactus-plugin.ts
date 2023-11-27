@@ -102,7 +102,7 @@ export class HealthCareCactusPlugin
     const listDataOrg1 = new ListDataHspA({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
-      keychainId: CryptoMaterial.keychains.keychain1.id
+      keychainId: CryptoMaterial.keychains.keychain1.id,
     });
 
     // Endpoints for network 2
@@ -110,7 +110,7 @@ export class HealthCareCactusPlugin
     const listDataOrg2 = new ListDataHspB({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient2,
-      keychainId: CryptoMaterial.keychains.keychain2.id // contract variable
+      keychainId: CryptoMaterial.keychains.keychain2.id, // contract variable
     });
 
     this.endpoints = [

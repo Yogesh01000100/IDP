@@ -9,4 +9,4 @@ export {
     STATE_DATABASE_V2,
     organizationDefinitionFabricV2_V2,
     LedgerStartOptions_V2,
-  } from "./fabric/fabric-test-ledger-v2";
+  } from "./fabric/test-v2";

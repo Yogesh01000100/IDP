@@ -15,6 +15,20 @@ export declare const org2Env: {
     CORE_PEER_TLS_ROOTCERT_FILE: string;
     ORDERER_TLS_ROOTCERT_FILE: string;
 };
+export declare const org3Env: {
+    CORE_PEER_LOCALMSPID: string;
+    CORE_PEER_ADDRESS: string;
+    CORE_PEER_MSPCONFIGPATH: string;
+    CORE_PEER_TLS_ROOTCERT_FILE: string;
+    ORDERER_TLS_ROOTCERT_FILE: string;
+};
+export declare const org4Env: {
+    CORE_PEER_LOCALMSPID: string;
+    CORE_PEER_ADDRESS: string;
+    CORE_PEER_MSPCONFIGPATH: string;
+    CORE_PEER_TLS_ROOTCERT_FILE: string;
+    ORDERER_TLS_ROOTCERT_FILE: string;
+};
 export interface IHealthCareInfrastructureOptions {
     logLevel?: LogLevelDesc;
 }
@@ -30,6 +44,8 @@ export declare class HealthCareAppDummyInfrastructure {
     constructor(options: IHealthCareInfrastructureOptions);
     get org1Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x;
     get org2Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x;
+    get org3Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x;
+    get org4Env(): NodeJS.ProcessEnv & DeploymentTargetOrgFabric2x;
     start(): Promise<void>;
     stop(): Promise<void>;
     createFabric1LedgerConnector(): Promise<PluginLedgerConnectorFabric>;

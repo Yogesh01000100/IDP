@@ -1,20 +1,8 @@
-import { EventEmitter } from "events";
-
 import compareVersions from "compare-versions";
 import temp from "temp";
-
-import Docker, {
-  Container,
-  ContainerCreateOptions,
-  ContainerInfo,
-} from "dockerode";
-
 import { Wallets, Gateway, Wallet, X509Identity } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
 
-import Joi from "joi";
-import { ITestLedger } from "../i-test-ledger";
-import { Containers } from "../common/containers";
 import {
   Checks,
   Logger,
@@ -23,7 +11,7 @@ import {
   Bools,
   safeStringifyException,
 } from "@hyperledger/cactus-common";
-import Dockerode from "dockerode";
+
 import {
   NodeSSH,
   Config as SshConfig,
@@ -33,7 +21,6 @@ import {
 import path from "path";
 import fs from "fs";
 import yaml from "js-yaml";
-import { envMapToDocker } from "../common/env-map-to-docker";
 import { RuntimeError } from "run-time-error-cjs";
 
 export interface organizationDefinitionFabricV2_V2 {
@@ -51,13 +38,7 @@ export interface EnrollFabricIdentityOptionsV1 {
   readonly organization: string;
 }
 
-/*
- * Contains options for Fabric container
- */
 export interface IFabricTestLedgerV2ConstructorOptions {
-  publishAllPorts: boolean;
-  imageVersion?: string;
-  imageName?: string;
   envVars?: Map<string, string>;
   logLevel?: LogLevelDesc;
   emitContainerLogs?: boolean;
@@ -78,48 +59,19 @@ export interface LedgerStartOptions_V2 {
   containerID?: string;
 }
 
-export const DEFAULT_FABRIC_2_AIO_IMAGE_NAME_V2 =
-  "ghcr.io/hyperledger/cactus-fabric2-all-in-one";
-export const DEFAULT_FABRIC_2_AIO_IMAGE_VERSION_V2 =
-  "2023-08-17-issue2057-pr2135";
-export const DEFAULT_FABRIC_2_AIO_FABRIC_VERSION_V2 = "2.4.4";
-
 /*
  * Provides default options for Fabric container
  */
 const DEFAULT_OPTS = Object.freeze({
-  imageName: "ghcr.io/hyperledger/cactus-fabric-all-in-one",
-  imageVersion: "v1.0.0-rc.2",
   envVars: new Map([["FABRIC_VERSION", "1.4.8"]]),
   stateDatabase: STATE_DATABASE_V2.COUCH_DB,
   orgList: ["org1", "org2"],
 });
 export const FABRIC_TEST_LEDGER_DEFAULT_OPTIONS_V2 = DEFAULT_OPTS;
 
-/*
- * Provides validations for the Fabric container's options
- */
-const OPTS_JOI_SCHEMA: Joi.Schema = Joi.object().keys({
-  publishAllPorts: Joi.boolean().required(),
-  imageVersion: Joi.string().min(5).required(),
-  imageName: Joi.string()
-    .regex(/[a-z0-9]+(?:[._-]{1,2}[a-z0-9]+)*/)
-    .min(1)
-    .required(),
-  envVars: Joi.object().pattern(/.*/, [
-    Joi.string().required(),
-    Joi.string().min(1).required(),
-  ]),
-});
-
-export const FABRIC_TEST_LEDGER_OPTIONS_JOI_SCHEMA_V2 = OPTS_JOI_SCHEMA;
-
-export class FabricTestLedgerV2 implements ITestLedger {
+// ports and paths yet to be changed
+export class FabricTestLedgerV2 {
   public static readonly CLASS_NAME = "FabricTestLedgerV2";
-
-  public readonly imageVersion: string;
-  public readonly imageName: string;
-  public readonly publishAllPorts: boolean;
   public readonly emitContainerLogs: boolean;
   public readonly envVars: Map<string, string>;
   public readonly stateDatabase: STATE_DATABASE_V2;
@@ -129,9 +81,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
 
   private readonly log: Logger;
 
-  private container: Container | undefined;
   private containerId: string | undefined;
-  private readonly useRunningLedger: boolean;
 
   public get className(): string {
     return FabricTestLedgerV2.CLASS_NAME;
@@ -145,9 +95,6 @@ export class FabricTestLedgerV2 implements ITestLedger {
     const label = this.className;
     this.log = LoggerProvider.getOrCreate({ level, label });
 
-    this.imageVersion = options.imageVersion || DEFAULT_OPTS.imageVersion;
-    this.imageName = options.imageName || DEFAULT_OPTS.imageName;
-    this.publishAllPorts = options.publishAllPorts;
     this.emitContainerLogs = Bools.isBooleanStrict(options.emitContainerLogs)
       ? (options.emitContainerLogs as boolean)
       : true;
@@ -161,26 +108,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
         `This version of Fabric ${this.getFabricVersion()} is unsupported`,
       );
 
-    this.useRunningLedger = Bools.isBooleanStrict(options.useRunningLedger)
-      ? (options.useRunningLedger as boolean)
-      : false;
-
-    this.testLedgerId = `cactusf2.${this.imageVersion}.${Date.now()}`;
-
-    this.validateConstructorOptions();
-  }
-
-  public getContainer(): Container {
-    const fnTag = "FabricTestLedgerV2#getContainer()";
-    if (!this.container) {
-      throw new Error(`${fnTag} container not yet started by this instance.`);
-    } else {
-      return this.container;
-    }
-  }
-
-  public getContainerImageName(): string {
-    return `${this.imageName}:${this.imageVersion}`;
+    this.testLedgerId = `Fabric-network-2`;
   }
 
   public getFabricVersion(): string {
@@ -195,6 +123,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
     return "Org1MSP";
   }
 
+  // checked
   public async createCaClientV2(
     organization: string,
   ): Promise<FabricCAServices> {
@@ -215,7 +144,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
       throw new RuntimeError(`${fnTag} Inner Exception:`, ex);
     }
   }
-
+  // checked
   public async createCaClient(): Promise<FabricCAServices> {
     const fnTag = `${this.className}#createCaClient()`;
     try {
@@ -225,7 +154,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
       throw new RuntimeError(`${fnTag} Inner Exception:`, ex);
     }
   }
-
+  // checked
   public async enrollUserV2(opts: EnrollFabricIdentityOptionsV1): Promise<any> {
     const fnTag = `${this.className}#enrollUserV2()`;
 
@@ -293,7 +222,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
       throw new RuntimeError(`${fnTag} failed with inner exception:`, ex);
     }
   }
-
+  // checked
   public async enrollUser(wallet: Wallet): Promise<any> {
     const fnTag = `${this.className}#enrollUser()`;
     try {
@@ -314,6 +243,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
     return ["admin", "adminpw"];
   }
 
+  // checked
   public async enrollAdminV2(
     opts: Partial<EnrollFabricIdentityOptionsV1>,
   ): Promise<[X509Identity, Wallet]> {
@@ -358,6 +288,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
     }
   }
 
+  // checked
   public async enrollAdmin(): Promise<[X509Identity, Wallet]> {
     const fnTag = `${this.className}#enrollAdmin()`;
     try {
@@ -369,111 +300,39 @@ export class FabricTestLedgerV2 implements ITestLedger {
     }
   }
 
-  // need to change this
+  // changed (paths found)
   public async getConnectionProfileOrg1(): Promise<any> {
-    const cInfo = await this.getContainerInfo();
-    const container = this.getContainer();
-    const CCP_JSON_PATH_FABRIC_V1 =
-      "/fabric-samples/first-network/connection-org1.json";
-    const CCP_JSON_PATH_FABRIC_V2 =
-      "/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json";
-    const ccpJsonPath = compareVersions.compare(
-      this.getFabricVersion(),
-      "2.0",
-      "<",
-    )
-      ? CCP_JSON_PATH_FABRIC_V1
-      : CCP_JSON_PATH_FABRIC_V2;
-    const ccpJson = await Containers.pullFile(container, ccpJsonPath);
-    const ccp = JSON.parse(ccpJson);
+    try {
+      // Define the path to your local connection profile JSON
+      const localCcpPath = path.resolve(
+        __dirname,
+        "path-to-your-connection-profile.json", // found the file
+      );
 
-    {
-      // peer0.org1.example.com
-      const privatePort = 7151;
-      const hostPort = await Containers.getPublicPort(privatePort, cInfo);
-      ccp.peers["peer0.org1.example.com"].url = `grpcs://localhost:${hostPort}`;
+      // Read the connection profile JSON file
+      const ccpJson = fs.readFileSync(localCcpPath, "utf8");
+      const ccp = JSON.parse(ccpJson);
+
+      // Set the URLs directly (adjust as needed for your setup)
+      ccp.peers["peer0.org1.example.com"].url = `grpcs://localhost:8001`;
+      if (ccp.peers["peer1.org1.example.com"]) {
+        ccp.peers["peer1.org1.example.com"].url = `grpcs://localhost:9001`;
+      }
+      ccp.certificateAuthorities[
+        "ca.org1.example.com"
+      ].url = `https://localhost:8004`;
+
+      // Update orderer information
+      ccp.orderers["orderer.example.com"].url = `grpcs://localhost:8000`;
+
+      return ccp;
+    } catch (error) {
+      console.error("Failed to load connection profile:", error);
+      throw error;
     }
-    if (ccp.peers["peer1.org1.example.com"]) {
-      // peer1.org1.example.com
-      const privatePort = 8151;
-      const hostPort = await Containers.getPublicPort(privatePort, cInfo);
-      ccp.peers["peer1.org1.example.com"].url = `grpcs://localhost:${hostPort}`;
-    }
-    {
-      // ca_peerOrg1
-      const privatePort = 7154;
-      const hostPort = await Containers.getPublicPort(privatePort, cInfo);
-      const { certificateAuthorities: cas } = ccp;
-      cas["ca.org1.example.com"].url = `https://localhost:${hostPort}`;
-    }
-
-    // FIXME - this still doesn't work. At this moment the only successful tests
-    // we could run was with host ports bound to the matching ports of the internal
-    // containers and with discovery enabled.
-    // When discovery is disabled, it just doesn't yet work and these changes
-    // below are my attempts so far at making the connection profile work without
-    // discovery being turned on (which we cannot use when the ports are randomized
-    // on the host for the parent container)
-    if (this.publishAllPorts) {
-      // orderer.example.com
-
-      const privatePort = 7150;
-      const hostPort = await Containers.getPublicPort(privatePort, cInfo);
-      const url = `grpc://localhost:${hostPort}`;
-      const ORDERER_PEM_PATH_FABRIC_V1 =
-        "/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem";
-      const ORDERER_PEM_PATH_FABRIC_V2 =
-        "/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem";
-      const ordererPemPath = compareVersions.compare(
-        this.getFabricVersion(),
-        "2.0",
-        "<",
-      )
-        ? ORDERER_PEM_PATH_FABRIC_V1
-        : ORDERER_PEM_PATH_FABRIC_V2;
-      const pem = await Containers.pullFile(container, ordererPemPath);
-
-      ccp.orderers = {
-        "orderer.example.com": {
-          url,
-          grpcOptions: {
-            "ssl-target-name-override": "orderer.example.com",
-          },
-          tlsCACerts: {
-            pem,
-          },
-        },
-      };
-
-      ccp.channels = {
-        mychannel: {
-          orderers: ["orderer.example.com"],
-          peers: {
-            "peer0.org1.example.com": {
-              endorsingPeer: true,
-              chaincodeQuery: true,
-              ledgerQuery: true,
-              eventSource: true,
-              discover: true,
-            },
-          },
-        },
-      };
-
-      // FIXME: Still have no idea if we can use these options to make it work
-      // with discovery
-      // {
-      //   const { grpcOptions } = ccp.peers["peer0.org1.example.com"];
-      //   grpcOptions.hostnameOverride = `localhost`;
-      // }
-      // {
-      //   const { grpcOptions } = ccp.peers["peer1.org1.example.com"];
-      //   grpcOptions.hostnameOverride = `localhost`;
-      // }
-    }
-    return ccp;
   }
-  // need to change this
+
+  // changed (paths found)
   public async getConnectionProfileOrgX(orgName: string): Promise<any> {
     const fnTag = `${this.className}:getConnectionProfileOrgX()`;
     this.log.debug(`${fnTag} ENTER - orgName=%s`, orgName);
@@ -492,120 +351,50 @@ export class FabricTestLedgerV2 implements ITestLedger {
             orgName + ".example.com",
             "connection-" + orgName + ".json",
           );
+
     const peer0Name = `peer0.${orgName}.example.com`;
     const peer1Name = `peer1.${orgName}.example.com`;
-    const cInfo = await this.getContainerInfo();
-    const container = this.getContainer();
-    const CCP_JSON_PATH_FABRIC_V1 =
-      "/fabric-samples/first-network/connection-org" + orgName + ".json";
-    const CCP_JSON_PATH_FABRIC_V2 = connectionProfilePath;
-    const ccpJsonPath = compareVersions.compare(
-      this.getFabricVersion(),
-      "2.0",
-      "<",
-    )
-      ? CCP_JSON_PATH_FABRIC_V1
-      : CCP_JSON_PATH_FABRIC_V2;
+
     try {
-      const cId = container.id;
-      this.log.debug(`${fnTag} Pull Fabric CP %s :: %s`, cId, ccpJsonPath);
-      const ccpJson = await Containers.pullFile(container, ccpJsonPath);
-      this.log.debug(`${fnTag} Got Fabric CP %s :: %s OK`, cId, ccpJsonPath);
+      const ccpJsonPath = connectionProfilePath;
+      const ccpJson = fs.readFileSync(ccpJsonPath, "utf8");
       const ccp = JSON.parse(ccpJson);
 
-      // Treat peer0
-      const urlGrpcs = ccp["peers"][peer0Name]["url"];
-      const privatePortPeer0 = parseFloat(urlGrpcs.replace(/^\D+/g, ""));
-
-      const hostPort = await Containers.getPublicPort(privatePortPeer0, cInfo);
-      ccp["peers"][peer0Name]["url"] = `grpcs://localhost:${hostPort}`;
-
-      // if there is a peer1
-      if (ccp.peers["peer1.org" + orgName + ".example.com"]) {
-        const urlGrpcs = ccp["peers"][peer1Name]["url"];
-        const privatePortPeer1 = parseFloat(urlGrpcs.replace(/^\D+/g, ""));
-
-        const hostPortPeer1 = await Containers.getPublicPort(
-          privatePortPeer1,
-          cInfo,
-        );
-        ccp["peers"][peer1Name]["url"] = `grpcs://localhost:${hostPortPeer1}`;
-      }
-      {
-        // ca_peerOrg1
-        const caName = `ca.${orgName}.example.com`;
-        const urlGrpcs = ccp["certificateAuthorities"][caName]["url"];
-        const caPort = parseFloat(urlGrpcs.replace(/^\D+/g, ""));
-
-        const caHostPort = await Containers.getPublicPort(caPort, cInfo);
-        const { certificateAuthorities: cas } = ccp;
-        cas[caName].url = `https://localhost:${caHostPort}`;
+      // Set peer URLs
+      ccp.peers[peer0Name].url = `grpcs://localhost:8001`;
+      if (ccp.peers[peer1Name]) {
+        ccp.peers[peer1Name].url = `grpcs://localhost:9001`;
       }
 
-      // FIXME - this still doesn't work. At this moment the only successful tests
-      // we could run was with host ports bound to the matching ports of the internal
-      // containers and with discovery enabled.
-      // When discovery is disabled, it just doesn't yet work and these changes
-      // below are my attempts so far at making the connection profile work without
-      // discovery being turned on (which we cannot use when the ports are randomized
-      // on the host for the parent container)
-      if (this.publishAllPorts) {
-        // orderer.example.com
+      // Set CA URL
+      const caName = `ca.${orgName}.example.com`;
+      ccp.certificateAuthorities[caName].url = `https://localhost:8004`;
 
-        const privatePort = 7150;
-        const hostPort = await Containers.getPublicPort(privatePort, cInfo);
-        const url = `grpc://localhost:${hostPort}`;
-        const ORDERER_PEM_PATH_FABRIC_V1 =
-          "/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem";
-        const ORDERER_PEM_PATH_FABRIC_V2 =
-          "/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem";
-        const ordererPemPath = compareVersions.compare(
-          this.getFabricVersion(),
-          "2.0",
-          "<",
-        )
-          ? ORDERER_PEM_PATH_FABRIC_V1
-          : ORDERER_PEM_PATH_FABRIC_V2;
-        const pem = await Containers.pullFile(container, ordererPemPath);
-        ccp.orderers = {
-          "orderer.example.com": {
-            url,
-            grpcOptions: {
-              "ssl-target-name-override": "orderer.example.com",
-            },
-            tlsCACerts: {
-              pem,
-            },
-          },
-        };
-        const specificPeer = "peer0." + orgName + ".example.com";
+      // Set orderer URL and load TLS certificate
+      const ordererPemPath = path.resolve(
+        __dirname,
+        "path-to-orderer-tls-certificate.pem", // found the path
+      );
+      const pem = fs.readFileSync(ordererPemPath, "utf8");
+      ccp.orderers["orderer.example.com"].url = `grpcs://localhost:8004`;
+      ccp.orderers["orderer.example.com"].tlsCACerts = { pem: pem };
 
-        ccp.channels = {
-          mychannel: {
-            orderers: ["orderer.example.com"],
-            peers: {},
-          },
-        };
+      // Set channel configuration
+      const specificPeer = `peer0.${orgName}.example.com`;
+      ccp.channels = {
+        mychannel: {
+          orderers: ["orderer.example.com"],
+          peers: {},
+        },
+      };
+      ccp.channels["mychannel"]["peers"][specificPeer] = {
+        endorsingPeer: true,
+        chaincodeQuery: true,
+        ledgerQuery: true,
+        eventSource: true,
+        discover: true,
+      };
 
-        ccp.channels["mychannel"]["peers"][specificPeer] = {
-          endorsingPeer: true,
-          chaincodeQuery: true,
-          ledgerQuery: true,
-          eventSource: true,
-          discover: true,
-        };
-
-        // FIXME: Still have no idea if we can use these options to make it work
-        // with discovery
-        // {
-        //   const { grpcOptions } = ccp.peers["peer0.org1.example.com"];
-        //   grpcOptions.hostnameOverride = `localhost`;
-        // }
-        // {
-        //   const { grpcOptions } = ccp.peers["peer1.org1.example.com"];
-        //   grpcOptions.hostnameOverride = `localhost`;
-        // }
-      }
       return ccp;
     } catch (ex: unknown) {
       this.log.debug(`getConnectionProfileOrgX() crashed: `, ex);
@@ -614,6 +403,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
     }
   }
 
+  // left this doubt
   public async populateFile(
     addOrgXDirectoryPath: string,
     templateType: string,
@@ -1034,19 +824,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
     }
   }
 
-  public setContainer(id: string): void {
-    const fnTag = "FabricTestLedgerV2#setContainer()";
-    let container;
-    try {
-      const docker = new Docker();
-      container = docker.getContainer(id);
-      this.container = container;
-      this.containerId = id;
-    } catch (error) {
-      throw new Error(`${fnTag} cannot set container.`);
-    }
-  }
-
+  // checked
   public async addExtraOrgs(): Promise<void> {
     const fnTag = `FabricTestLedger#addOrgX()`;
     const { log } = this;
@@ -1067,6 +845,8 @@ export class FabricTestLedgerV2 implements ITestLedger {
       );
     }
   }
+
+  // checked but doubt
   // req: AddOrganizationFabricV2Request
   // returns promise <AddOrganizationFabricV2Response>
   public async addOrgX(
@@ -1075,7 +855,7 @@ export class FabricTestLedgerV2 implements ITestLedger {
     channel = "mychannel",
     certificateAuthority: boolean,
     database: string,
-    peerPort = "11051",
+    peerPort = "11051", // check the port
   ): Promise<void> {
     const fnTag = `FabricTestLedger#addOrgX()`;
     const { log } = this;
@@ -1269,26 +1049,31 @@ export class FabricTestLedgerV2 implements ITestLedger {
     }
   }
 
-  //checked
+  // changed (path found)
   public async getSshConfig(): Promise<SshConfig> {
     const fnTag = "FabricTestLedger#getSshConnectionOptions()";
-    if (!this.container) {
-      throw new Error(`${fnTag} - invalid state no container instance set`);
-    }
-    const filePath = "/etc/hyperledger/cactus/fabric-aio-image.key";
-    const privateKey = await Containers.pullFile(this.container, filePath);
-    const containerInfo = await this.getContainerInfo();
-    const port = await Containers.getPublicPort(22, containerInfo);
+
+    // Replace these with your actual SSH configuration details
+    const privateKeyPath = "path/to/your/private/key"; // also found
+    const sshPort = 22; // The SSH port of your server
+    const sshHost = "localhost"; // or the hostname/IP of your SSH server
+    const sshUsername = "root"; // or your SSH username
+
+    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+    this.log.debug(
+      `${fnTag} - Reading SSH private key from path: ${privateKeyPath}`,
+    );
     const sshConfig: SshConfig = {
-      host: "localhost",
-      privateKey,
-      username: "root",
-      port,
+      host: sshHost,
+      privateKey: privateKey,
+      username: sshUsername,
+      port: sshPort,
     };
+
     return sshConfig;
   }
 
-  //checked
+  // checked
   private async sshExec(
     cmd: string,
     label: string,
@@ -1301,269 +1086,5 @@ export class FabricTestLedgerV2 implements ITestLedger {
     Checks.truthy(cmdRes.code === null, `${label} cmdRes.code === null`);
     return cmdRes;
   }
-
-  //checked
-  public async start(ops?: LedgerStartOptions_V2): Promise<Container> {
-    const containerNameAndTag = this.getContainerImageName();
-
-    if (this.useRunningLedger) {
-      this.log.info(
-        "Search for already running Fabric Test Ledger because 'useRunningLedger' flag is enabled.",
-      );
-      this.log.info(
-        "Search criteria - image name: ",
-        containerNameAndTag,
-        ", state: running",
-      );
-      const containerInfo = await Containers.getByPredicate(
-        (ci) => ci.Image === containerNameAndTag && ci.State === "running",
-      );
-      const docker = new Docker();
-      this.containerId = containerInfo.Id;
-      this.container = docker.getContainer(this.containerId);
-      return this.container;
-    }
-
-    const dockerEnvVars = envMapToDocker(this.envVars);
-
-    if (this.container) {
-      await this.container.stop();
-      await this.container.remove();
-    }
-    const docker = new Docker();
-
-    if (ops) {
-      if (!ops.omitPull) {
-        await Containers.pullImage(containerNameAndTag);
-      }
-      if (ops.setContainer && ops.containerID) {
-        this.setContainer(ops.containerID);
-        if (this.container) {
-          return this.container;
-        } else {
-          throw new Error(
-            `Cannot set container ID without a running test ledger`,
-          );
-        }
-      }
-    } else {
-      // Pull image by default
-      await Containers.pullImage(containerNameAndTag);
-    }
-
-    //checked
-    const createOptions: ContainerCreateOptions = {
-      name: this.testLedgerId,
-      ExposedPorts: {
-        "22/tcp": {}, // OpenSSH Server - TCP (remains the same)
-        "5985/tcp": {}, // couchdb0 for Fabric 2
-        "6985/tcp": {}, // couchdb1 for Fabric 2
-        "7150/tcp": {}, // orderer.example.com for Fabric 2
-        "7151/tcp": {}, // peer0.org1.example.com for Fabric 2
-        "7154/tcp": {}, // ca_peerOrg1 for Fabric 2
-        "7985/tcp": {}, // couchdb2 for Fabric 2
-        "8151/tcp": {}, // peer1.org1.example.com for Fabric 2
-        "8154/tcp": {}, // ca_peerOrg2 for Fabric 2
-        "8985/tcp": {}, // couchdb3 for Fabric 2
-        "9002/tcp": {}, // supervisord web ui/dashboard for Fabric 2
-        "9151/tcp": {}, // peer0.org2.example.com for Fabric 2
-        "10151/tcp": {}, // peer1.org2.example.com for Fabric 2
-      },
-
-      Env: dockerEnvVars,
-      HostConfig: {
-        PublishAllPorts: this.publishAllPorts,
-        Privileged: true,
-        PortBindings: {
-          "22/tcp": [{ HostPort: "30023" }],
-          "7150/tcp": [{ HostPort: "7150" }],
-          "7151/tcp": [{ HostPort: "7151" }],
-          "7154/tcp": [{ HostPort: "7154" }],
-          "8151/tcp": [{ HostPort: "8151" }],
-          "8154/tcp": [{ HostPort: "8154" }],
-          "9151/tcp": [{ HostPort: "9151" }],
-          "10151/tcp": [{ HostPort: "10151" }],
-        },
-      },
-    };
-    if (this.extraOrgs) {
-      this.extraOrgs.forEach((org) => {
-        const caPort = String(Number(org.port) + 3);
-        if (createOptions["ExposedPorts"] && createOptions["HostConfig"]) {
-          createOptions["ExposedPorts"][`${org.port}/tcp`] = {};
-          createOptions["ExposedPorts"][`${caPort}/tcp`] = {};
-          createOptions["HostConfig"]["PortBindings"][org.port] = [
-            { HostPort: org.port },
-          ];
-          createOptions["HostConfig"]["PortBindings"][caPort] = [
-            { HostPort: caPort },
-          ];
-        }
-      });
-    }
-    // (createOptions as any).PortBindings = {
-    //   "22/tcp": [{ HostPort: "30022" }],
-    //   "7050/tcp": [{ HostPort: "7050" }],
-    //   "7051/tcp": [{ HostPort: "7051" }],
-    //   "7054/tcp": [{ HostPort: "7054" }],
-    //   "8051/tcp": [{ HostPort: "8051" }],
-    //   "8054/tcp": [{ HostPort: "8054" }],
-    //   "9051/tcp": [{ HostPort: "9051" }],
-    //   "10051/tcp": [{ HostPort: "10051" }],
-    // };
-
-    return new Promise<Container>((resolve, reject) => {
-      const eventEmitter: EventEmitter = docker.run(
-        containerNameAndTag,
-        [],
-        [],
-        createOptions,
-        {},
-        (err: any) => {
-          if (err) {
-            reject(err);
-          }
-        },
-      );
-
-      eventEmitter.once("start", async (container: Container) => {
-        this.container = container;
-        this.containerId = container.id;
-
-        if (this.emitContainerLogs) {
-          const fnTag = `[${this.getContainerImageName()}]`;
-          await Containers.streamLogs({
-            container: this.getContainer(),
-            tag: fnTag,
-            log: this.log,
-          });
-        }
-
-        try {
-          await this.waitForHealthCheck();
-          if (this.extraOrgs) {
-            for (let i = 0; i < this.extraOrgs.length; i++) {
-              await this.addOrgX(
-                this.extraOrgs[i].path,
-                this.extraOrgs[i].orgName,
-                this.extraOrgs[i].orgChannel,
-                this.extraOrgs[i].certificateAuthority,
-                this.extraOrgs[i].stateDatabase,
-                this.extraOrgs[i].port,
-              );
-            }
-          }
-          resolve(container);
-        } catch (ex) {
-          reject(ex);
-        }
-      });
-    });
-  }
-
-  //checked
-  public async waitForHealthCheck(timeoutMs = 180000): Promise<void> {
-    const fnTag = "FabricTestLedgerV2#waitForHealthCheck()";
-    const startedAt = Date.now();
-    let reachable = false;
-    do {
-      try {
-        const { Status } = await this.getContainerInfo();
-        reachable = Status.endsWith(" (healthy)");
-      } catch (ex) {
-        reachable = false;
-        if (Date.now() >= startedAt + timeoutMs) {
-          throw new Error(`${fnTag} timed out (${timeoutMs}ms) -> ${ex}`);
-        }
-      }
-      await new Promise((resolve2) => setTimeout(resolve2, 1000));
-    } while (!reachable);
-  }
-
-  public stop(): Promise<unknown> {
-    if (this.useRunningLedger) {
-      this.log.info("Ignore stop request because useRunningLedger is enabled.");
-      return Promise.resolve();
-    } else if (this.container) {
-      return Containers.stop(this.container);
-    } else {
-      return Promise.reject(
-        new Error(`Container was never created, nothing to stop.`),
-      );
-    }
-  }
-
-  //checked
-  public async destroy(): Promise<void> {
-    const fnTag = "FabricTestLedgerV2#destroy()";
-
-    if (this.useRunningLedger) {
-      this.log.info(
-        "Ignore destroy request because useRunningLedger is enabled.",
-      );
-      return Promise.resolve();
-    }
-
-    try {
-      if (!this.container) {
-        throw new Error(`${fnTag} Container not found, nothing to destroy.`);
-      }
-      const docker = new Dockerode();
-      const containerInfo = await this.container.inspect();
-      const volumes = containerInfo.Mounts;
-      await this.container.remove();
-      volumes.forEach(async (volume) => {
-        this.log.debug("Removing volume: ", volume);
-        if (volume.Name) {
-          const volumeToDelete = docker.getVolume(volume.Name);
-          await volumeToDelete.remove();
-        } else {
-          this.log.debug("Volume", volume, "could not be removed");
-        }
-      });
-    } catch (error) {
-      this.log.debug(error);
-      throw new Error(`${fnTag}": ${error}"`);
-    }
-  }
-
-  //checked
-  protected async getContainerInfo(): Promise<ContainerInfo> {
-    const fnTag = "FabricTestLedgerV2#getContainerInfo()";
-    const docker = new Docker();
-    const image = this.getContainerImageName();
-    const containerInfos = await docker.listContainers({});
-
-    let aContainerInfo;
-    if (this.containerId !== undefined) {
-      aContainerInfo = containerInfos.find((ci) => ci.Id === this.containerId);
-    }
-
-    if (aContainerInfo) {
-      return aContainerInfo;
-    } else {
-      throw new Error(`${fnTag} no image "${image}"`);
-    }
-  }
-
-  //checked
-  public async getContainerIpAddress(): Promise<string> {
-    const containerInfo = await this.getContainerInfo();
-    return Containers.getContainerInternalIp(containerInfo);
-  }
-
-  //checked
-  private validateConstructorOptions(): void {
-    const fnTag = "FabricTestLedgerV2#validateConstructorOptions()";
-    const result = OPTS_JOI_SCHEMA.validate({
-      imageVersion: this.imageVersion,
-      imageName: this.imageName,
-      publishAllPorts: this.publishAllPorts,
-      envVars: this.envVars,
-    });
-
-    if (result.error) {
-      throw new Error(`${fnTag} ${result.error.annotate()}`);
-    }
-  }
 }
+
