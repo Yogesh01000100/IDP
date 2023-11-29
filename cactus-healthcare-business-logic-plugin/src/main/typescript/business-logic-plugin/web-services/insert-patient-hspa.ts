@@ -100,7 +100,7 @@ export class InsertDataHspA implements IWebServiceEndpoint {
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
-          keychainRef: "user2",
+          keychainRef: "userA",
         },
         channelName: "mychannel",
         contractName: "EHRContract",

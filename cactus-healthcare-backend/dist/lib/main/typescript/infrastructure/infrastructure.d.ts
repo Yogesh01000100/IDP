@@ -51,5 +51,4 @@ export declare class HealthCareAppDummyInfrastructure {
     createFabric1LedgerConnector(): Promise<PluginLedgerConnectorFabric>;
     createFabric2LedgerConnector(): Promise<PluginLedgerConnectorFabric>;
     deployFabricContract1(fabricApiClient: FabricApi): Promise<void>;
-    deployFabricContract2(fabricApiClient: FabricApi): Promise<void>;
 }

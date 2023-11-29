@@ -60,12 +60,12 @@ class ListDataHspA {
             const request = {
                 signingCredential: {
                     keychainId: this.keychainId,
-                    keychainRef: "user2",
+                    keychainRef: "userA",
                 },
                 channelName: "mychannel",
                 contractName: "EHRContract",
                 invocationType: cactus_plugin_ledger_connector_fabric_1.FabricContractInvocationType.Call,
-                methodName: "ReadPatientRecord",
+                methodName: "GetAllPatientRecords",
                 params: [], // pass the ID of the patient
             };
             const { data: { functionOutput }, } = await this.opts.fabricApi.runTransactionV1(request);

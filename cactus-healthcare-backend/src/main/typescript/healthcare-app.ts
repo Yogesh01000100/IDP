@@ -59,9 +59,9 @@ export class HealthCareApp {
     await this.infrastructure.start();
     this.onShutdown(() => this.infrastructure.stop());
 
+
     const fabricPlugin1 = await this.infrastructure.createFabric1LedgerConnector();
     const fabricPlugin2 = await this.infrastructure.createFabric2LedgerConnector();
-
     // Reserve the ports where the API Servers will run
     const httpApiA = await Servers.startOnPort(this.options.apiServer1Port, this.options.apiHost);
     const httpApiB = await Servers.startOnPort(this.options.apiServer2Port, this.options.apiHost);
@@ -72,9 +72,8 @@ export class HealthCareApp {
     const nodeApiHostB = `http://${this.options.apiHost}:${addressInfoB.port}`;
 
     const fabricApiClient1 = new FabricApi(new Configuration({ basePath: nodeApiHostA }));
-    const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));// done
-
-    // to be done
+    const fabricApiClient2 = new FabricApi(new Configuration({ basePath: nodeApiHostB }));
+   
     const FabricRegistry1 = new PluginRegistry({
       plugins: [
         new PluginKeychainMemory({
@@ -113,11 +112,11 @@ export class HealthCareApp {
 
     const apiServer1 = await this.startNode(httpApiA, FabricRegistry1);
     const apiServer2 = await this.startNode(httpApiB, FabricRegistry2);
-    
+
     this.log.info("Deploying chaincode...");
 
     await this.infrastructure.deployFabricContract1(fabricApiClient1);
-    await this.infrastructure.deployFabricContract2(fabricApiClient2);
+    //await this.infrastructure.deployFabricContract2(fabricApiClient2);
 
     this.log.info(`Chaincode deployed.`);
 

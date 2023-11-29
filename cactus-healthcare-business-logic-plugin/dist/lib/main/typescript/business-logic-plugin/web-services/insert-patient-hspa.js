@@ -62,7 +62,7 @@ class InsertDataHspA {
             const request = {
                 signingCredential: {
                     keychainId: this.keychainId,
-                    keychainRef: "user2",
+                    keychainRef: "userA",
                 },
                 channelName: "mychannel",
                 contractName: "EHRContract",

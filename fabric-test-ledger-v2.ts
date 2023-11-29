@@ -300,13 +300,12 @@ export class FabricTestLedgerV2 {
     }
   }
 
-  // changed (paths found)
+  // changed (paths found and added)
   public async getConnectionProfileOrg1(): Promise<any> {
     try {
       // Define the path to your local connection profile JSON
       const localCcpPath = path.resolve(
-        __dirname,
-        "path-to-your-connection-profile.json", // found the file
+        "/home/yogesh/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json",
       );
 
       // Read the connection profile JSON file
@@ -314,7 +313,7 @@ export class FabricTestLedgerV2 {
       const ccp = JSON.parse(ccpJson);
 
       // Set the URLs directly (adjust as needed for your setup)
-      ccp.peers["peer0.org1.example.com"].url = `grpcs://localhost:8001`;
+      ccp.peers["peer0.org1.example.com"].url = `grpc://localhost:8001`;
       if (ccp.peers["peer1.org1.example.com"]) {
         ccp.peers["peer1.org1.example.com"].url = `grpcs://localhost:9001`;
       }
@@ -322,8 +321,8 @@ export class FabricTestLedgerV2 {
         "ca.org1.example.com"
       ].url = `https://localhost:8004`;
 
-      // Update orderer information
-      ccp.orderers["orderer.example.com"].url = `grpcs://localhost:8000`;
+      // orderer information
+      ccp.orderers["orderer.example.com"].url = `grpc://localhost:8000`;
 
       return ccp;
     } catch (error) {
@@ -332,7 +331,7 @@ export class FabricTestLedgerV2 {
     }
   }
 
-  // changed (paths found)
+  // changed (paths found and added)
   public async getConnectionProfileOrgX(orgName: string): Promise<any> {
     const fnTag = `${this.className}:getConnectionProfileOrgX()`;
     this.log.debug(`${fnTag} ENTER - orgName=%s`, orgName);
@@ -340,7 +339,7 @@ export class FabricTestLedgerV2 {
     const connectionProfilePath =
       orgName === "org1" || orgName === "org2"
         ? path.join(
-            "fabric-samples/test-network",
+            "/home/yogesh/fabric-samples/test-network",
             "organizations/peerOrganizations",
             orgName + ".example.com",
             "connection-" + orgName + ".json",
@@ -361,22 +360,23 @@ export class FabricTestLedgerV2 {
       const ccp = JSON.parse(ccpJson);
 
       // Set peer URLs
-      ccp.peers[peer0Name].url = `grpcs://localhost:8001`;
+      ccp.peers[peer0Name].url = `grpc://localhost:8001`;
       if (ccp.peers[peer1Name]) {
         ccp.peers[peer1Name].url = `grpcs://localhost:9001`;
       }
 
-      // Set CA URL
+      // Set CA URL based on the organization
       const caName = `ca.${orgName}.example.com`;
-      ccp.certificateAuthorities[caName].url = `https://localhost:8004`;
+      const caPort = orgName === "org1" ? "8004" : "9004";
+      ccp.certificateAuthorities[caName].url = `https://localhost:${caPort}`;
 
       // Set orderer URL and load TLS certificate
       const ordererPemPath = path.resolve(
-        __dirname,
-        "path-to-orderer-tls-certificate.pem", // found the path
+        "/home/yogesh/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt",
       );
+
       const pem = fs.readFileSync(ordererPemPath, "utf8");
-      ccp.orderers["orderer.example.com"].url = `grpcs://localhost:8004`;
+      ccp.orderers["orderer.example.com"].url = `grpc://localhost:8000`;
       ccp.orderers["orderer.example.com"].tlsCACerts = { pem: pem };
 
       // Set channel configuration
@@ -1049,15 +1049,15 @@ export class FabricTestLedgerV2 {
     }
   }
 
-  // changed (path found)
+  // changed (path found and added)
   public async getSshConfig(): Promise<SshConfig> {
     const fnTag = "FabricTestLedger#getSshConnectionOptions()";
 
     // Replace these with your actual SSH configuration details
-    const privateKeyPath = "path/to/your/private/key"; // also found
+    const privateKeyPath = "/home/yogesh/.ssh/id_rsa";
     const sshPort = 22; // The SSH port of your server
-    const sshHost = "localhost"; // or the hostname/IP of your SSH server
-    const sshUsername = "root"; // or your SSH username
+    const sshHost = "localhost";
+    const sshUsername = "yogesh";
 
     const privateKey = fs.readFileSync(privateKeyPath, "utf8");
     this.log.debug(
@@ -1087,4 +1087,3 @@ export class FabricTestLedgerV2 {
     return cmdRes;
   }
 }
-
