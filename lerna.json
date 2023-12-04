@@ -1,0 +1,19 @@
+{
+  "packages": [
+    "packages/cactus-*",
+    "source/cactus-*",
+    "extensions/cactus-*",
+    "packages/cacti-*",
+    "source/cacti-*",
+    "extensions/cacti-*"
+  ],
+  "version": "2.0.0-alpha.2",
+  "npmClient": "yarn",
+  "useWorkspaces": "true",
+  "command": {
+    "version": {
+      "message": "chore(release): publish"
+    }
+  },
+  "changelogPreset": "angular"
+}

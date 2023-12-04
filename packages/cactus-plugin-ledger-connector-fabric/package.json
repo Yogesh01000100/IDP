@@ -1,0 +1,128 @@
+{
+  "name": "@hyperledger/cactus-plugin-ledger-connector-fabric",
+  "version": "2.0.0-alpha.2",
+  "description": "Allows Cactus nodes to connect to a Fabric ledger.",
+  "keywords": [
+    "Hyperledger",
+    "Cactus",
+    "Integration",
+    "Blockchain",
+    "Distributed Ledger Technology"
+  ],
+  "homepage": "https://github.com/hyperledger/cacti#readme",
+  "bugs": {
+    "url": "https://github.com/hyperledger/cacti/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyperledger/cacti.git"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Hyperledger Cactus Contributors",
+    "email": "cactus@lists.hyperledger.org",
+    "url": "https://www.hyperledger.org/use/cacti"
+  },
+  "contributors": [
+    {
+      "name": "Please add yourself to the list of contributors",
+      "email": "your.name@example.com",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Peter Somogyvari",
+      "email": "peter.somogyvari@accenture.com",
+      "url": "https://accenture.com"
+    }
+  ],
+  "main": "dist/lib/main/typescript/index.js",
+  "module": "dist/lib/main/typescript/index.js",
+  "browser": "dist/cactus-plugin-ledger-connector-fabric.web.umd.js",
+  "types": "dist/lib/main/typescript/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "codegen": "run-p 'codegen:*'",
+    "codegen:openapi": "npm run generate-sdk",
+    "generate-sdk": "run-p 'generate-sdk:*'",
+    "generate-sdk:kotlin": "openapi-generator-cli generate -i ./src/main/json/openapi.json -g kotlin -o ./src/main/kotlin/generated/openapi/kotlin-client/ --reserved-words-mappings protected=protected",
+    "generate-sdk:typescript-axios": "openapi-generator-cli generate -i ./src/main/json/openapi.json -g typescript-axios -o ./src/main/typescript/generated/openapi/typescript-axios/ --reserved-words-mappings protected=protected",
+    "watch": "npm-watch",
+    "webpack": "npm-run-all webpack:dev",
+    "webpack:dev": "npm-run-all webpack:dev:node webpack:dev:web",
+    "webpack:dev:node": "webpack --env=dev --target=node --config ../../webpack.config.js",
+    "webpack:dev:web": "webpack --env=dev --target=web --config ../../webpack.config.js"
+  },
+  "dependencies": {
+    "@fidm/x509": "1.2.1",
+    "@hyperledger/cactus-common": "2.0.0-alpha.2",
+    "@hyperledger/cactus-core": "2.0.0-alpha.2",
+    "@hyperledger/cactus-core-api": "2.0.0-alpha.2",
+    "axios": "1.6.0",
+    "bl": "5.0.0",
+    "bn.js": "4.12.0",
+    "elliptic": "6.5.4",
+    "express": "4.18.2",
+    "fabric-ca-client": "2.5.0-snapshot.23",
+    "fabric-common": "2.5.0-snapshot.23",
+    "fabric-network": "2.5.0-snapshot.23",
+    "fabric-protos": "2.5.0-snapshot.23",
+    "fast-safe-stringify": "2.1.1",
+    "form-data": "4.0.0",
+    "http-status-codes": "2.1.4",
+    "jsrsasign": "10.5.25",
+    "multer": "1.4.5-lts.1",
+    "ngo": "2.7.0",
+    "node-ssh": "13.1.0",
+    "node-vault": "0.9.22",
+    "openapi-types": "9.1.0",
+    "prom-client": "13.2.0",
+    "run-time-error-cjs": "1.4.0",
+    "rxjs": "7.8.1",
+    "sanitize-filename": "1.6.3",
+    "sanitize-html": "2.7.0",
+    "secp256k1": "4.0.3",
+    "socket.io-client-fixed-types": "4.5.4",
+    "temp": "0.9.4",
+    "typescript-optional": "2.0.1",
+    "uuid": "8.3.2",
+    "ws-identity-client": "1.0.2"
+  },
+  "devDependencies": {
+    "@hyperledger/cactus-plugin-keychain-memory": "2.0.0-alpha.2",
+    "@hyperledger/cactus-test-tooling": "2.0.0-alpha.2",
+    "@types/bn.js": "5.1.0",
+    "@types/body-parser": "1.19.4",
+    "@types/elliptic": "6.4.16",
+    "@types/express": "4.17.19",
+    "@types/fs-extra": "9.0.13",
+    "@types/jsrsasign": "8.0.13",
+    "@types/multer": "1.4.7",
+    "@types/node-vault": "0.9.13",
+    "@types/sanitize-html": "2.6.2",
+    "@types/temp": "0.9.1",
+    "@types/uuid": "8.3.4",
+    "body-parser": "1.20.2",
+    "fs-extra": "10.1.0",
+    "internal-ip": "6.2.0",
+    "socket.io": "4.5.4",
+    "ws-wallet": "1.1.5"
+  },
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "browserMinified": "dist/cactus-plugin-ledger-connector-fabric.web.umd.min.js",
+  "mainMinified": "dist/cactus-plugin-ledger-connector-fabric.node.umd.min.js",
+  "watch": {
+    "codegen:openapi": {
+      "patterns": [
+        "./src/main/json/openapi.json"
+      ]
+    }
+  }
+}

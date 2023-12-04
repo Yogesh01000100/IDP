@@ -1,0 +1,13 @@
+{
+    "info": {
+      "description": "this file contains data to be used for testing purposes only, ID for specific Blockchain"
+    },
+    "keychains": {
+      "keychain1": {
+        "id": "df05d3c2-ddd5-4074-aae3-526564217459"
+      },
+      "keychain2": {
+        "id": "d741fb4a-c95c-4205-8afa-758a9423234f"
+      }
+    }
+  }
