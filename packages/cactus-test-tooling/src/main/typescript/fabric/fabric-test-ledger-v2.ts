@@ -3,6 +3,8 @@ import temp from "temp";
 import { Wallets, Gateway, Wallet, X509Identity } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
 
+//network 2 local folder with ssh config
+
 import {
   Checks,
   Logger,
@@ -20,6 +22,7 @@ import {
 } from "node-ssh";
 import path from "path";
 import fs from "fs";
+import os from "os";
 import yaml from "js-yaml";
 import { RuntimeError } from "run-time-error-cjs";
 
@@ -1053,8 +1056,9 @@ export class FabricTestLedgerV2 {
   public async getSshConfig(): Promise<SshConfig> {
     const fnTag = "FabricTestLedger#getSshConnectionOptions()";
 
-    // Replace these with your actual SSH configuration details
-    const privateKeyPath = "/home/username/.ssh/id_rsa";
+    const systemUsername = os.userInfo().username;
+    // const privateKeyPath = "/home/username/.ssh/id_rsa";
+    const privateKeyPath = `/home/${systemUsername}/.ssh/id_rsa`;
     const sshPort = 22; // The SSH port of your server
     const sshHost = "localhost";
     const sshUsername = "root";
