@@ -62,6 +62,15 @@ export {
 } from "./fabric/fabric-test-ledger-v1";
 
 export {
+  FabricTestLedgerV2,
+  IFabricTestLedgerV2ConstructorOptions,
+  FABRIC_TEST_LEDGER_DEFAULT_OPTIONS_V2,
+  STATE_DATABASE_V2,
+  organizationDefinitionFabricV2_V2,
+  LedgerStartOptions_V2,
+} from "./fabric/fabric-test-ledger-v2";
+
+export {
   IrohaTestLedger,
   IIrohaTestLedgerOptions,
   IROHA_TEST_LEDGER_DEFAULT_OPTIONS,
