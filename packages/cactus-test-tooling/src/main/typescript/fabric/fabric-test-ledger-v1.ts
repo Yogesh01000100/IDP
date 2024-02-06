@@ -49,6 +49,7 @@ export interface EnrollFabricIdentityOptionsV1 {
   readonly wallet: Wallet;
   readonly enrollmentID: string;
   readonly organization: string;
+  readonly roles?: string[];
 }
 
 /*
@@ -233,7 +234,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     Checks.nonBlankString(opts.enrollmentID, "enrollUserV2 opts.enrollmentID");
     Checks.truthy(opts.wallet, "enrollUserV2 opts.wallet");
 
-    const { enrollmentID, organization, wallet } = opts;
+    const { enrollmentID, organization, wallet, roles } = opts;
     try {
       const mspId = this.capitalizedMspIdOfOrg(organization);
       const connectionProfile =
@@ -258,7 +259,11 @@ export class FabricTestLedgerV1 implements ITestLedger {
         affiliation: opts.organization + ".department1",
         enrollmentID: opts.enrollmentID,
         role: "client",
+        attrs: [{ name: 'Roles', value:`${roles}`, ecert: true}]
       };
+
+      this.log.debug(`registration req : ${JSON.stringify(registrationRequest)}`);
+      this.log.debug(`Wallet import of "${enrollmentID}" OK`);
 
       const provider = opts.wallet
         .getProviderRegistry()
