@@ -13,6 +13,7 @@ import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory
 import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
+const networkData = require('./userData/Data');
 
 interface Credentials {
   certificate: string;
@@ -24,6 +25,12 @@ interface EntryWithCredentials {
   credentials: Credentials;
   mspId: string;
   type: string;
+}
+
+interface UserData {
+  u_id: string;
+  k_id:string;
+  role: string;
 }
 
 // [for fab net -1]
@@ -209,20 +216,15 @@ export class HealthCareAppDummyInfrastructure {
 
   public async createFabric1LedgerConnector(): Promise<PluginLedgerConnectorFabric> {
     const connectionProfileOrg1 = await this.fabric1.getConnectionProfileOrg1();
+
+    const doctors = networkData.NetworkA.Doctors;
+    const patients = networkData.NetworkA.Patients;
+    const assistantDoctors = networkData.NetworkA.AssistantDoctors;
+
     const enrollAdminOutOrg1 = await this.fabric1.enrollAdminV2({
       organization: "org1",
     });
     const adminWalletOrg1 = enrollAdminOutOrg1[1];
-    const [userIdentity1] = await this.fabric1.enrollUserV2({
-      wallet: adminWalletOrg1,
-      enrollmentID: "userA",
-      organization: "org1",
-    });
-    const [userIdentity2] = await this.fabric1.enrollUserV2({
-      wallet: adminWalletOrg1,
-      enrollmentID: "userB",
-      organization: "org1",
-    });
 
     const enrollAdminOutOrg2 = await this.fabric1.enrollAdminV2({
       organization: "org2",
@@ -236,19 +238,35 @@ export class HealthCareAppDummyInfrastructure {
 
     const sshConfig = await this.fabric1.getSshConfig();
 
-    const keychainEntryKey1 = "userA";
-    const keychainEntryValue1 = JSON.stringify(userIdentity1);
+    let keychainEntries: { [key: string]: any } = {};
 
-    const keychainEntryKey2 = "userB";
-    const keychainEntryValue2 = JSON.stringify(userIdentity2);
+
+    const registerUsers=async(arr:UserData[])=>
+    {
+      for(let i=0; i<arr.length;i++){
+        const {u_id,k_id, role }=arr[i];
+      
+        const [userIdentity] = await this.fabric1.enrollUserV2({
+          wallet: adminWalletOrg1,
+          enrollmentID: u_id,
+          organization: "org1",
+          roles:[role]
+        });
+
+        const keychainEntryKey=k_id;
+        const keychainEntryValue=JSON.stringify(userIdentity);
+
+        keychainEntries[keychainEntryKey]=keychainEntryValue;
+      }
+    }
+
+    await registerUsers(doctors);
+    await registerUsers(patients);
+    await registerUsers(assistantDoctors);
 
     const keychainEntryKey3 = "bridge1";
     const keychainEntryValue3 = JSON.stringify(bridgeIdentity);
-    const keychainEntries = {
-      [keychainEntryKey1]: keychainEntryValue1,
-      [keychainEntryKey2]: keychainEntryValue2,
-      [keychainEntryKey3]: keychainEntryValue3
-    };
+    keychainEntries[keychainEntryKey3] = keychainEntryValue3;
 
     const formattedEntries = Object.fromEntries(
       Object.entries(keychainEntries).map(([key, value]) => {
@@ -292,11 +310,7 @@ export class HealthCareAppDummyInfrastructure {
       instanceId: uuidv4(),
       keychainId: CryptoMaterial.keychains.keychain1.id,
       logLevel: undefined,
-      backend: new Map([
-        [keychainEntryKey1, keychainEntryValue1],
-        [keychainEntryKey2, keychainEntryValue2],
-        [keychainEntryKey3, keychainEntryValue3],
-      ]),
+      backend: new Map(Object.entries(keychainEntries))
     });
 
     const pluginRegistry = new PluginRegistry({ plugins: [keychainPlugin] });
@@ -489,6 +503,17 @@ export class HealthCareAppDummyInfrastructure {
         filename,
       });
     }
+    {
+      const filename = "./role-check.js";
+      const relativePath = "./lib/";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
     this.log.info("File paths navigated...");
     let retries = 0;
     while (retries <= 5) {
@@ -552,15 +577,40 @@ export class HealthCareAppDummyInfrastructure {
           Checks.truthy(packaging, `packaging truthy OK`);
           Checks.truthy(queryCommitted, `queryCommitted truthy OK`);
           await new Promise((resolve) => setTimeout(resolve, 10000));
-          await fabricApiClient.runTransactionV1({
+
+          const sampleMedicalReport = {
+            visit_date: "2024-02-05",
+            doctor_name: "Dr. Smith",
+            diagnosis: "Common Cold",
+            prescription: "Antibiotics, plenty of rest, and fluids",
+          };
+        
+          const sampleData = {
+              first_name: "Tarini",
+              last_name: "Devan",
+              date_of_birth: "1992-06-15",
+              gender: "Other",
+              address: "87/14\nChana Path\nNagercoil 750154",
+              contact_email: "tarini.devan@gmail.com",
+              contact_phone: "2906161600",
+              emergency_contact_name: "Rania Bhasin",
+              emergency_contact_phone: "02514898895",
+              data: [
+                  {
+                      medical_reports: [sampleMedicalReport],
+                  }
+              ]
+          };
+          
+          await fabricApiClient.runTransactionV1({// create a api for this create function
             contractName,
             channelName,
-            params: [ ],
-            methodName: "InitLedger",
+            params: [ "50a4f403-411e-55a1-b22d-8cbf7c03763d", JSON.stringify(sampleData)],
+            methodName: "CreatePatientRecord",
             invocationType: FabricContractInvocationType.Send,
             signingCredential: {
               keychainId: CryptoMaterial.keychains.keychain1.id,
-              keychainRef: "userA",
+              keychainRef: "670500a1-2c1f-57d7-a210-d783a82c10cd",
             },
           });
         })

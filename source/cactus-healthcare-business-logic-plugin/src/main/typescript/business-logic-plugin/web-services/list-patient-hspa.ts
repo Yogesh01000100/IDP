@@ -98,13 +98,13 @@ export class ListDataHspA implements IWebServiceEndpoint {
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
-          keychainRef: "userA",
+          keychainRef: "670500a1-2c1f-57d7-a210-d783a82c10cd",
         },
         channelName: "mychannel",
         contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Call,
-        methodName: "GetAllPatientRecords",
-        params: [], // pass the ID of the patient
+        methodName: "ReadPatientRecord",
+        params: ["50a4f403-411e-55a1-b22d-8cbf7c03763d"], // pass the ID of the patient
       };
       const {
         data: { functionOutput },
