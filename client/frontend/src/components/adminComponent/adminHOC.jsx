@@ -16,7 +16,7 @@ function AdminHOC(Component) {
         </div>
     );
   }
-return MemberCustomHOC;
+  return MemberCustomHOC;
 }
 
 export default AdminHOC;
