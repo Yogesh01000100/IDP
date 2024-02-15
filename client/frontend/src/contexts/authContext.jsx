@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
             access_token: sampleAccessToken,
           },
         };
-        //const res = await api.post('/login', data);
+        //const res = await api.post('auth/login', data);
         console.log("RES : ", res);
         localStorage.setItem('health_care_app', res.data.access_token);
         dispatch({ type: 'AUTH_SUCCESS', payload: res.data.access_token });
