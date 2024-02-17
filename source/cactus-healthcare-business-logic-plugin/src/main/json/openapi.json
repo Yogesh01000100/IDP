@@ -3,154 +3,496 @@
   "info": {
     "title": "Hyperledger Cactus Example - Health Care EHR App",
     "description": "Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.",
-    "version": "v2.0.0-alpha.2",
-    "license": {
-      "name": "Apache-2.0",
-      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
-    }
+    "version": "v1.0"
   },
   "components": {
     "schemas": {
-      "HospitalNetworkA": {
+      "CreateDoctorRequest": {
         "type": "object",
-        "required": ["id", "HIdB"],
         "properties": {
-          "id": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
+          "u_id": {
+            "type": "string"
           },
-          "HIdB": {
-            "description": "The foreign key ID referencing the corresponding entry in HospitalNetworkB.",
+          "role": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 1024,
-            "nullable": false
-          }
-        }
-      },
-      "HospitalNetworkB": {
-        "type": "object",
-        "required": ["id"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
-          }
-        }
-      },
-      "InsertDataRequest": {
-        "type": "object",
-        "required": ["data"],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HospitalNetworkA"
-          }
-        }
-      },
-      "InsertDataResponseHSPA": {
-        "type": "object",
-        "properties": {
-          "callOutput": {
-            "type": "object",
-            "additionalProperties": true
+            "enum": [
+              "doctor"
+            ]
           },
-          "transactionReceipt": {
-            "type": "object",
-            "additionalProperties": true
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "specialty": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
           }
-        }
+        },
+        "required": [
+          "u_id",
+          "role",
+          "first_name",
+          "last_name",
+          "specialty",
+          "contact_email",
+          "contact_phone",
+          "network_id",
+          "organization"
+        ]
       },
-      "ListHSPAResponse": {
+      "CreateDoctorResponse": {
         "type": "object",
-        "required": ["data"],
         "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "CreatePatientRequest": {
+        "type": "object",
+        "properties": {
+          "u_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient"
+            ]
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "date_of_birth": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "Male",
+              "Female",
+              "Other"
+            ]
+          },
+          "address": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "emergency_contact_name": {
+            "type": "string"
+          },
+          "emergency_contact_phone": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
           "data": {
             "type": "array",
-            "nullable": false,
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/HospitalNetworkA"
+            "items": {}
+          }
+        },
+        "required": [
+          "u_id",
+          "role",
+          "first_name",
+          "last_name",
+          "date_of_birth",
+          "gender",
+          "address",
+          "contact_email",
+          "contact_phone",
+          "emergency_contact_name",
+          "emergency_contact_phone",
+          "network_id",
+          "organization",
+          "data"
+        ]
+      },
+      "CreatePatientResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "GetMyProfilePatientResponse": {
+        "type": "object",
+        "properties": {
+          "u_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "street": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "zipcode": {
+                "type": "string"
+              }
             },
-            "minItems": 0,
-            "maxItems": 65535
+            "required": [
+              "street",
+              "city",
+              "zipcode"
+            ]
+          },
+          "age": {
+            "type": "integer"
+          },
+          "bloodgroup": {
+            "type": "string"
+          }
+        },
+        "description": "Response containing patient profile information",
+        "required": [
+          "u_id",
+          "role",
+          "first_name",
+          "last_name",
+          "contact_email",
+          "address",
+          "age",
+          "bloodgroup"
+        ]
+      },
+      "GetMyProfileAssistantDoctorResponse": {
+        "type": "object",
+        "properties": {
+          "u_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "street": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "zipcode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "street",
+              "city",
+              "zipcode"
+            ]
+          },
+          "specialty": {
+            "type": "string"
+          },
+          "supervisor_id": {
+            "type": "string"
+          }
+        },
+        "description": "Response containing assistant doctor profile information",
+        "required": [
+          "u_id",
+          "role",
+          "first_name",
+          "last_name",
+          "contact_email",
+          "address",
+          "specialty",
+          "supervisor_id"
+        ]
+      },
+      "GetMyProfileDoctorResponse": {
+        "type": "object",
+        "properties": {
+          "u_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "street": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "zipcode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "street",
+              "city",
+              "zipcode"
+            ]
+          },
+          "specialty": {
+            "type": "string"
+          }
+        },
+        "description": "Response containing doctor profile information",
+        "required": [
+          "u_id",
+          "role",
+          "first_name",
+          "last_name",
+          "contact_email",
+          "address",
+          "specialty"
+        ]
+      },
+      "CreateAppointmentRequest": {
+        "type": "object",
+        "properties": {
+          "patient_id": {
+            "type": "string"
+          },
+          "doctor_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "patient_id",
+          "doctor_id"
+        ]
+      },
+      "CreateAppointmentResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "appointment_id": {
+            "type": "string"
           }
         }
       },
-      "ListHSPBResponse": {
+      "AcceptAppointmentRequest": {
         "type": "object",
-        "required": ["data"],
         "properties": {
-          "data": {
-            "type": "array",
-            "nullable": false,
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/HospitalNetworkB"
-            },
-            "minItems": 0,
-            "maxItems": 65535
+          "appointment_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointment_id"
+        ]
+      },
+      "AcceptAppointmentResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "GetAppointmentDataRequest": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ]
+      },
+      "GetAppointmentDataResponse": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string"
+          },
+          "patient_id": {
+            "type": "string"
+          },
+          "doctor_id": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ehr_req": {
+            "type": "string"
+          }
+        }
+      },
+      "SendEHRToAppointmentRequest": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string"
+          },
+          "ehrData": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "appointment_id",
+          "ehrData"
+        ]
+      },
+      "SendEHRToAppointmentResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "GetEHRForDoctorRequest": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointment_id"
+        ]
+      },
+      "GetEHRForDoctorResponse": {
+        "type": "object",
+        "properties": {
+          "ehr": {
+            "type": "object"
+          }
+        }
+      },
+      "GetEHRForPatientRequest": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ]
+      },
+      "GetEHRForPatientResponse": {
+        "type": "object",
+        "properties": {
+          "ehr": {
+            "type": "object"
           }
         }
       }
     }
   },
   "paths": {
-    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa": {
+    "/api/cactus-healthcare-backend/create-doctor": {
       "post": {
         "x-hyperledger-cactus": {
           "http": {
             "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa"
+            "path": "/api/cactus-healthcare-backend/create-doctor"
           }
         },
-        "operationId": "InsertDataRequestV1",
-        "summary": "Inserts the provided data to the ledger A",
-        "parameters": [],
+        "operationId": "createDoctor",
+        "summary": "Create Doctor",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InsertDataRequest"
+                "$ref": "#/components/schemas/CreateDoctorRequest"
               }
             }
           }
         },
-        "responses": {
-          "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InsertDataResponseHSPA"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa": {
-      "get": {
-        "x-hyperledger-cactus": {
-          "http": {
-            "verbLowerCase": "get",
-            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa"
-          }
-        },
-        "operationId": "listDataN1",
-        "summary": "Lists Patient's EHR stored on the ledger A",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListHSPAResponse"
+                  "$ref": "#/components/schemas/CreateDoctorResponse"
                 }
               }
             }
@@ -158,30 +500,309 @@
         }
       }
     },
-    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb": {
-        "get": {
-          "x-hyperledger-cactus": {
-            "http": {
-              "verbLowerCase": "get",
-              "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"
+    "/api/cactus-healthcare-backend/create-patient": {
+      "post": {
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "post",
+            "path": "/api/cactus-healthcare-backend/create-patient"
+          }
+        },
+        "operationId": "createPatient",
+        "summary": "Create Patient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePatientRequest"
+              }
             }
-          },
-          "operationId": "listDataN2",
-          "summary": "Lists Patient's EHR stored on the ledger B",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "OK",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/ListHSPBResponse"
-                  }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePatientResponse"
                 }
               }
             }
           }
         }
       }
+    },
+    "/api/cactus-healthcare-backend/get-my-profile-doctor": {
+      "get": {
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/cactus-healthcare-backend/get-my-profile-doctor"
+          }
+        },
+        "operationId": "getMyProfile",
+        "summary": "Get My Profile",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyProfileDoctorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/get-my-profile-patient": {
+      "get": {
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/cactus-healthcare-backend/get-my-profile-patient"
+          }
+        },
+        "operationId": "getMyProfile",
+        "summary": "Get My Profile",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyProfilePatientResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/get-my-profile-asst-doctor": {
+      "get": {
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/get-my-profile-asst-doctor"
+          }
+        },
+        "operationId": "getMyProfile",
+        "summary": "Get My Profile",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyProfileAssistantDoctorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/create-appointment": {
+      "post": {
+        "summary": "Create Appointment",
+        "operationId": "createAppointment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAppointmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/accept-appointment": {
+      "post": {
+        "summary": "Accept Appointment",
+        "operationId": "acceptAppointment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptAppointmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptAppointmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/get-appointment-data": {
+      "get": {
+        "summary": "Get Appointment Data",
+        "operationId": "getAppointmentData",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GetAppointmentDataRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAppointmentDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/send-ehr-to-appointment": {
+      "put": {
+        "summary": "Send EHR to Appointment",
+        "operationId": "sendEHRToAppointment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEHRToAppointmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEHRToAppointmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/get-ehr-for-doctor": {
+      "get": {
+        "summary": "Get EHR for Doctor",
+        "operationId": "getEHRForDoctor",
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GetEHRForDoctorRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEHRForDoctorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cactus-healthcare-backend/get-ehr-for-patient": {
+      "get": {
+        "summary": "Get EHR for Patient",
+        "operationId": "getEHRForPatient",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GetEHRForPatientRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEHRForPatientResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
