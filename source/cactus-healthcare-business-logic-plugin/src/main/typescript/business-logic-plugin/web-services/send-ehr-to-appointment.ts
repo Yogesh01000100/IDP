@@ -14,7 +14,7 @@ import {
   IWebServiceEndpoint,
 } from "@hyperledger/cactus-core-api";
 import { registerWebServiceEndpoint } from "@hyperledger/cactus-core";
-import { InsertDataRequest } from "../../generated/openapi/typescript-axios/index"; // to be modified
+
 import {
   DefaultApi as FabricApi,
   FabricContractInvocationType,
@@ -23,26 +23,46 @@ import {
 
 import OAS from "../../../json/openapi.json";
 
-export interface IInsertDataHspAOptions {
-  logLevel?: LogLevelDesc;
-  fabricApi: FabricApi;
-  keychainId: string;
+export interface IListDataHspAOptions {
+  readonly logLevel?: LogLevelDesc;
+  readonly fabricApi: FabricApi;
+  readonly keychainId: string;
 }
 
-export class InsertDataHspA implements IWebServiceEndpoint {
-  public static readonly CLASS_NAME = "InsertDataHspA";
+export class SendEHRToAppointment implements IWebServiceEndpoint {
+  public static readonly CLASS_NAME = "SendEHRToAppointment";
   private readonly log: Logger;
   private readonly keychainId: string;
 
   public get className(): string {
-    return InsertDataHspA.CLASS_NAME;
+    return SendEHRToAppointment.CLASS_NAME;
   }
 
-  constructor(public readonly opts: IInsertDataHspAOptions) {
+  public getOasPath(): (typeof OAS.paths)["/api/cactus-healthcare-backend/send-ehr-to-appointment"] {
+    return OAS.paths[
+      "/api/cactus-healthcare-backend/send-ehr-to-appointment"
+    ];
+  }
+
+  getPath(): string {
+    const apiPath = this.getOasPath();
+    return apiPath.put["x-hyperledger-cactus"].http.path;
+  }
+
+  getVerbLowerCase(): string {
+    const apiPath = this.getOasPath();
+    return apiPath.put["x-hyperledger-cactus"].http.verbLowerCase;
+  }
+
+  public getOperationId(): string {
+    return this.getOasPath().put.operationId;
+  }
+
+  constructor(public readonly opts: IListDataHspAOptions) {
     const fnTag = `${this.className}#constructor()`;
     Checks.truthy(opts, `${fnTag} arg options`);
     Checks.truthy(opts.fabricApi, `${fnTag} options.fabricApi`);
-    Checks.truthy(opts.keychainId, `${fnTag} options.keychain`);
+    Checks.truthy(opts.keychainId, `${fnTag} options.keychainId`);
     const level = this.opts.logLevel || "INFO";
     const label = this.className;
     this.log = LoggerProvider.getOrCreate({ level, label });
@@ -67,55 +87,36 @@ export class InsertDataHspA implements IWebServiceEndpoint {
     return this;
   }
 
-  public getOasPath(): (typeof OAS.paths)["/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa"] {
-    return OAS.paths[
-      "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa"
-    ];
-  }
-
-  getPath(): string {
-    const apiPath = this.getOasPath();
-    return apiPath.post["x-hyperledger-cactus"].http.path;
-  }
-
-  getVerbLowerCase(): string {
-    const apiPath = this.getOasPath();
-    return apiPath.post["x-hyperledger-cactus"].http.verbLowerCase;
-  }
-
-  public getOperationId(): string {
-    return this.getOasPath().post.operationId;
-  }
-
   public getExpressRequestHandler(): IExpressRequestHandler {
     return this.handleRequest.bind(this);
   }
 
   async handleRequest(req: Request, res: Response): Promise<void> {
-    // main handling of the req for creating patient data
     const tag = `${this.getVerbLowerCase().toUpperCase()} ${this.getPath()}`;
     try {
-      const { data } = req.body as InsertDataRequest;
-      this.log.debug(`${tag} %o`, data);
+      this.log.debug(`${tag}`);
+      const keychainRef = req.params.keychainRef;
+      const appointmentId = req.params.appointmentId;
+      const data=req.body;
+
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
-          keychainRef: "userA",
+          keychainRef: keychainRef,
         },
         channelName: "mychannel",
         contractName: "EHRContract",
-        invocationType: FabricContractInvocationType.Send,
-        methodName: "CreatePatientRecord",
-        params: [data.id, data.HIdB], // here the chaincode has to be updated in order to match the param structure
+        invocationType: FabricContractInvocationType.Call,
+        methodName: "SendEHRToAppointment",
+        params: [appointmentId, data],
       };
       const {
         data: { functionOutput },
       } = await this.opts.fabricApi.runTransactionV1(request);
-
-      const body = { functionOutput };
-
-      res.json(body);
+      const output = JSON.parse(functionOutput);
+      const body = { data: output };
       res.status(200);
+      res.json(body);
     } catch (ex: unknown) {
       const exStr = safeStringifyException(ex);
       this.log.debug(`${tag} Failed to serve request:`, ex);

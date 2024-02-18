@@ -29,7 +29,13 @@ async function checkPatientRole(ctx) {
     return await checkRole(ctx, 'patient');
 }
 
+async function checkAsstDoctorRole(ctx) {
+    return await checkRole(ctx, 'assistant_doctor');
+}
+
 module.exports = {
     checkPatientRole,
     checkDoctorRole,
+    checkAsstDoctorRole
+
 };

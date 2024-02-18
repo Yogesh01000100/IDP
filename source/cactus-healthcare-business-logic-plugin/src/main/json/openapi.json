@@ -607,7 +607,7 @@
         "x-hyperledger-cactus": {
           "http": {
             "verbLowerCase": "get",
-            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/get-my-profile-asst-doctor"
+            "path": "/api/cactus-healthcare-backend/get-my-profile-asst-doctor"
           }
         },
         "operationId": "getMyProfile",
@@ -640,6 +640,12 @@
       "post": {
         "summary": "Create Appointment",
         "operationId": "createAppointment",
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "post",
+            "path": "/api/cactus-healthcare-backend/create-appointment"
+          }
+        },
         "requestBody": {
           "required": true,
           "content": {
@@ -665,9 +671,15 @@
       }
     },
     "/api/cactus-healthcare-backend/accept-appointment": {
-      "post": {
+      "put": {
         "summary": "Accept Appointment",
         "operationId": "acceptAppointment",
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "put",
+            "path": "/api/cactus-healthcare-backend/accept-appointment"
+          }
+        },
         "requestBody": {
           "required": true,
           "content": {
@@ -696,6 +708,12 @@
       "get": {
         "summary": "Get Appointment Data",
         "operationId": "getAppointmentData",
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/cactus-healthcare-backend/get-appointment-data"
+          }
+        },
         "parameters": [
           {
             "name": "user_id",
@@ -724,6 +742,12 @@
       "put": {
         "summary": "Send EHR to Appointment",
         "operationId": "sendEHRToAppointment",
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "put",
+            "path": "/api/cactus-healthcare-backend/send-ehr-to-appointment"
+          }
+        },
         "requestBody": {
           "required": true,
           "content": {
@@ -752,6 +776,12 @@
       "get": {
         "summary": "Get EHR for Doctor",
         "operationId": "getEHRForDoctor",
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/cactus-healthcare-backend/get-ehr-for-doctor"
+          }
+        },
         "parameters": [
           {
             "name": "appointment_id",
@@ -779,10 +809,16 @@
     "/api/cactus-healthcare-backend/get-ehr-for-patient": {
       "get": {
         "summary": "Get EHR for Patient",
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/cactus-healthcare-backend/get-ehr-for-patient"
+          }
+        },
         "operationId": "getEHRForPatient",
         "parameters": [
           {
-            "name": "user_id",
+            "name": "userId",
             "in": "query",
             "required": true,
             "schema": {

@@ -23,24 +23,24 @@ import {
 
 import OAS from "../../../json/openapi.json";
 
-export interface IListDataHspBOptions {
+export interface IListDataHspAOptions {
   readonly logLevel?: LogLevelDesc;
   readonly fabricApi: FabricApi;
   readonly keychainId: string;
 }
 
-export class ListDataHspB implements IWebServiceEndpoint {
-  public static readonly CLASS_NAME = "ListDataHspB";
+export class GetMyProfileDoctor implements IWebServiceEndpoint {
+  public static readonly CLASS_NAME = "GetMyProfileDoctor";
   private readonly log: Logger;
   private readonly keychainId: string;
 
   public get className(): string {
-    return ListDataHspB.CLASS_NAME;
+    return GetMyProfileDoctor.CLASS_NAME;
   }
 
-  public getOasPath(): (typeof OAS.paths)["/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"] {
+  public getOasPath(): (typeof OAS.paths)["/api/cactus-healthcare-backend/get-my-profile-doctor"] {
     return OAS.paths[
-      "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"
+      "/api/cactus-healthcare-backend/get-my-profile-doctor"
     ];
   }
 
@@ -58,7 +58,7 @@ export class ListDataHspB implements IWebServiceEndpoint {
     return this.getOasPath().get.operationId;
   }
 
-  constructor(public readonly opts: IListDataHspBOptions) {
+  constructor(public readonly opts: IListDataHspAOptions) {
     const fnTag = `${this.className}#constructor()`;
     Checks.truthy(opts, `${fnTag} arg options`);
     Checks.truthy(opts.fabricApi, `${fnTag} options.fabricApi`);
@@ -95,16 +95,18 @@ export class ListDataHspB implements IWebServiceEndpoint {
     const tag = `${this.getVerbLowerCase().toUpperCase()} ${this.getPath()}`;
     try {
       this.log.debug(`${tag}`);
+      const keychainRef = req.params.keychainRef;
+
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
-          keychainRef: "userA",
+          keychainRef: keychainRef,
         },
         channelName: "mychannel",
-        contractName: "basic",
+        contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Call,
-        methodName: "GetAllPatientRecords",
-        params: [], // pass the ID of the patient
+        methodName: "GetMyProfileDoctor",
+        params: [req.params.u_id],
       };
       const {
         data: { functionOutput },

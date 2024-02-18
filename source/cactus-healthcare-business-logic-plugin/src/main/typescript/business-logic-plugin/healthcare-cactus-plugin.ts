@@ -20,9 +20,18 @@ import { DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-conne
 
 //import { IHealthCareContractDeploymentInfo } from "../i-healthcare-contract-deployment-info";
 
-import { InsertDataHspA } from "./web-services/insert-patient-hspa";
-import { ListDataHspA } from "./web-services/list-patient-hspa";
-import { ListDataHspB } from "./web-services/list-patient-hspb";
+import { CreateDoctor } from "./web-services/create-doctor";
+import { CreatePatient } from "./web-services/create-patient";
+import { CreateAppointment } from "./web-services/create-appointment";
+import { AcceptAppointment } from "./web-services/accept-appointment";
+import { GetAppointmentData } from "./web-services/get-appointment-data";
+import { GetMyProfilePatient } from "./web-services/get-my-profile-patient";
+import { GetMyProfileDoctor } from "./web-services/get-my-profile-doctor";
+import { GetMyProfileAssistantDoctor } from "./web-services/get-my-profile-asst-doctor";
+import { SendEHRToAppointment } from "./web-services/send-ehr-to-appointment";
+import { GetEHRForDoctor } from "./web-services/get-ehr-doctor";
+import { GetEHRForPatient } from "./web-services/get-ehr-patient";
+
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
 
 export interface OrgEnv {
@@ -93,29 +102,162 @@ export class HealthCareCactusPlugin
     }  
 
     // Endpoints for network 1
-    const insertDataOrg1 = new InsertDataHspA({
+    const createDoctorNet1 = new CreateDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+    const createPatientNet1  = new CreatePatient({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
       keychainId: CryptoMaterial.keychains.keychain1.id,
     });
 
-    const listDataOrg1 = new ListDataHspA({
+    const createAppointmentNet1  = new CreateAppointment({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const acceptAppointmentNet1  = new AcceptAppointment({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const getAppointmentDataNet1  = new GetAppointmentData({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const getMyProfilePatientNet1  = new GetMyProfilePatient({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const getMyProfileDoctorNet1  = new GetMyProfileDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const getMyProfileAssistantDoctorNet1  = new GetMyProfileAssistantDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const sendEHRToAppointmentNet1  = new SendEHRToAppointment({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+
+    const getEHRForDoctorNet1  = new GetEHRForDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient1,
+      keychainId: CryptoMaterial.keychains.keychain1.id,
+    });
+
+    const getEHRForPatientNet1  = new GetEHRForPatient({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient1,
       keychainId: CryptoMaterial.keychains.keychain1.id,
     });
 
     // Endpoints for network 2
-    const listDataOrg2 = new ListDataHspB({
+    const createDoctorNet2 = new CreateDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+    const createPatientNet2  = new CreatePatient({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const createAppointmentNet2  = new CreateAppointment({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const acceptAppointmentNet2  = new AcceptAppointment({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const getAppointmentDataNet2  = new GetAppointmentData({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const getMyProfilePatientNet2  = new GetMyProfilePatient({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const getMyProfileDoctorNet2  = new GetMyProfileDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const getMyProfileAssistantDoctorNet2  = new GetMyProfileAssistantDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const sendEHRToAppointmentNet2  = new SendEHRToAppointment({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+
+    const getEHRForDoctorNet2  = new GetEHRForDoctor({
+      logLevel: this.options.logLevel,
+      fabricApi: this.options.fabricApiClient2,
+      keychainId: CryptoMaterial.keychains.keychain2.id,
+    });
+
+    const getEHRForPatientNet2  = new GetEHRForPatient({
       logLevel: this.options.logLevel,
       fabricApi: this.options.fabricApiClient2,
       keychainId: CryptoMaterial.keychains.keychain2.id,
     });
 
     this.endpoints = [
-      insertDataOrg1,
-      listDataOrg1,
-      listDataOrg2,
+      createDoctorNet1,
+      createPatientNet1,
+      createAppointmentNet1,
+      acceptAppointmentNet1,
+      getAppointmentDataNet1,
+      getMyProfilePatientNet1,
+      getMyProfileDoctorNet1,
+      getMyProfileAssistantDoctorNet1,
+      sendEHRToAppointmentNet1,
+      getEHRForDoctorNet1,
+      getEHRForPatientNet1,
+      createDoctorNet2,
+      createPatientNet2,
+      createAppointmentNet2,
+      acceptAppointmentNet2,
+      getAppointmentDataNet2,
+      getMyProfilePatientNet2,
+      getMyProfileDoctorNet2,
+      getMyProfileAssistantDoctorNet2,
+      sendEHRToAppointmentNet2,
+      getEHRForDoctorNet2,
+      getEHRForPatientNet2
     ];
 
     return this.endpoints;

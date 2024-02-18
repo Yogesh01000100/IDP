@@ -577,40 +577,16 @@ export class HealthCareAppDummyInfrastructure {
           Checks.truthy(packaging, `packaging truthy OK`);
           Checks.truthy(queryCommitted, `queryCommitted truthy OK`);
           await new Promise((resolve) => setTimeout(resolve, 10000));
-
-          const sampleMedicalReport = {
-            visit_date: "2024-02-05",
-            doctor_name: "Dr. Smith",
-            diagnosis: "Common Cold",
-            prescription: "Antibiotics, plenty of rest, and fluids",
-          };
-        
-          const sampleData = {
-              first_name: "Tarini",
-              last_name: "Devan",
-              date_of_birth: "1992-06-15",
-              gender: "Other",
-              address: "87/14\nChana Path\nNagercoil 750154",
-              contact_email: "tarini.devan@gmail.com",
-              contact_phone: "2906161600",
-              emergency_contact_name: "Rania Bhasin",
-              emergency_contact_phone: "02514898895",
-              data: [
-                  {
-                      medical_reports: [sampleMedicalReport],
-                  }
-              ]
-          };
           
           await fabricApiClient.runTransactionV1({// create a api for this create function
             contractName,
             channelName,
-            params: [ "50a4f403-411e-55a1-b22d-8cbf7c03763d", JSON.stringify(sampleData)],
-            methodName: "CreatePatientRecord",
+            params: [],
+            methodName: "init",
             invocationType: FabricContractInvocationType.Send,
             signingCredential: {
               keychainId: CryptoMaterial.keychains.keychain1.id,
-              keychainRef: "670500a1-2c1f-57d7-a210-d783a82c10cd",
+              keychainRef: "",
             },
           });
         })

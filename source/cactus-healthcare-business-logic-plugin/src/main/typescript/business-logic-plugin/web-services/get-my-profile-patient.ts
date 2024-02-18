@@ -29,18 +29,18 @@ export interface IListDataHspAOptions {
   readonly keychainId: string;
 }
 
-export class ListDataHspA implements IWebServiceEndpoint {
-  public static readonly CLASS_NAME = "ListDataHspA";
+export class GetMyProfilePatient implements IWebServiceEndpoint {
+  public static readonly CLASS_NAME = "GetMyProfilePatient";
   private readonly log: Logger;
   private readonly keychainId: string;
 
   public get className(): string {
-    return ListDataHspA.CLASS_NAME;
+    return GetMyProfilePatient.CLASS_NAME;
   }
 
-  public getOasPath(): (typeof OAS.paths)["/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa"] {
+  public getOasPath(): (typeof OAS.paths)["/api/cactus-healthcare-backend/get-my-profile-patient"] {
     return OAS.paths[
-      "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa"
+      "/api/cactus-healthcare-backend/get-my-profile-patient"
     ];
   }
 
@@ -95,16 +95,18 @@ export class ListDataHspA implements IWebServiceEndpoint {
     const tag = `${this.getVerbLowerCase().toUpperCase()} ${this.getPath()}`;
     try {
       this.log.debug(`${tag}`);
+      const keychainRef = req.params.keychainRef;
+
       const request: RunTransactionRequest = {
         signingCredential: {
           keychainId: this.keychainId,
-          keychainRef: "670500a1-2c1f-57d7-a210-d783a82c10cd",
+          keychainRef: keychainRef,
         },
         channelName: "mychannel",
         contractName: "EHRContract",
         invocationType: FabricContractInvocationType.Call,
-        methodName: "ReadPatientRecord",
-        params: ["50a4f403-411e-55a1-b22d-8cbf7c03763d"], // pass the ID of the patient
+        methodName: "GetMyProfilePatient",
+        params: [req.params.u_id],
       };
       const {
         data: { functionOutput },
