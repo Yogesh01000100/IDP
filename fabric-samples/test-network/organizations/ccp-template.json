@@ -45,5 +45,16 @@
                 "verify": false
             }
         }
+    },
+    "orderers": {
+        "orderer.example.com": {
+            "url": "grpc://localhost:8000",
+            "tlsCACerts": {
+                "pem": "${ORDERERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "orderer.example.com"
+            }
+        }
     }
 }

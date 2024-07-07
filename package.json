@@ -11,16 +11,7 @@
       "packages/cacti-*",
       "source/cacti-*",
       "source/healthcare-*",
-      "extensions/cacti-*",
-      "weaver/common/protos-js",
-      "weaver/sdks/fabric/interoperation-node-sdk",
-      "weaver/sdks/besu/node",
-      "weaver/core/drivers/fabric-driver",
-      "weaver/core/identity-management/iin-agent",
-      "weaver/samples/fabric/fabric-cli",
-      "weaver/samples/besu/besu-cli",
-      "weaver/samples/besu/simpleasset",
-      "weaver/samples/besu/simplestate"
+      "extensions/cacti-*"
     ]
   },
   "scripts": {
@@ -29,7 +20,7 @@
     "reset:git": "git clean -f -X",
     "reset:yarn-lock": "yarn run init-registries && yarn install --update-checksums --force",
     "reset": "run-s reset:git reset:node-modules reset:yarn-lock configure",
-    "configure": "npm run init-registries && yarn install && yarn build:dev:backend",
+    "configure": "yarn install && yarn build:dev:backend",
     "set-yarn-version": "yarn set version stable",
     "enable-corepack": "npm i -g corepack && corepack enable && corepack prepare yarn@3.6.0 --activate",
     "custom-checks": "TS_NODE_PROJECT=./tools/tsconfig.json node --trace-deprecation --experimental-modules --abort-on-uncaught-exception --loader ts-node/esm --experimental-specifier-resolution=node ./tools/custom-checks/run-custom-checks.ts",
@@ -72,9 +63,7 @@
     "test:tap:all": "NODE_OPTIONS=\"--experimental-vm-modules\" tap",
     "test:all": "NODE_OPTIONS=\"--experimental-vm-modules\" yarn test:jest:all && yarn test:tap:all",
     "prettier": "prettier --write --config .prettierrc.js \"./**/src/main/json/openapi.json\"",
-    "lerna-publish-canary": "lerna publish --canary --force-publish --dist-tag $(git branch --show-current) --preid $(git branch --show-current) --loglevel=silly",
-    "prepare": "husky install",
-    "init-registries": "npm config set @iroha2:registry=https://nexus.iroha.tech/repository/npm-group/"
+    "lerna-publish-canary": "lerna publish --canary --force-publish --dist-tag $(git branch --show-current) --preid $(git branch --show-current) --loglevel=silly"
   },
   "resolutions": {
     "@babel/traverse": ">=7.23.2",

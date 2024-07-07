@@ -1,18 +1,34 @@
-/* eslint-disable prettier/prettier */
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs-extra";
-import { Logger, Checks, LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
-import { FabricTestLedgerV1, 
-  FabricTestLedgerV2, 
-  DEFAULT_FABRIC_2_AIO_FABRIC_VERSION, 
+import {
+  Logger,
+  Checks,
+  LogLevelDesc,
+  LoggerProvider,
+} from "@hyperledger/cactus-common";
+import {
+  FabricTestLedgerV1,
+  FabricTestLedgerV2,
+  DEFAULT_FABRIC_2_AIO_FABRIC_VERSION,
   DEFAULT_FABRIC_2_AIO_IMAGE_NAME,
-  DEFAULT_FABRIC_2_AIO_IMAGE_VERSION
+  DEFAULT_FABRIC_2_AIO_IMAGE_VERSION,
 } from "@hyperledger/cactus-test-tooling";
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
-import { DefaultApi as FabricApi, ChainCodeProgrammingLanguage, DefaultEventHandlerStrategy, DeploymentTargetOrgFabric2x, FabricContractInvocationType, FileBase64, PluginLedgerConnectorFabric } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
+import {
+  DefaultApi as FabricApi,
+  ChainCodeProgrammingLanguage,
+  DefaultEventHandlerStrategy,
+  DeploymentTargetOrgFabric2x,
+  FabricContractInvocationType,
+  FileBase64,
+  PluginLedgerConnectorFabric,
+} from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
+
+import networkData1 from "./userData/net-1";
+import networkData2 from "./userData/net-2";
 
 interface Credentials {
   certificate: string;
@@ -26,8 +42,14 @@ interface EntryWithCredentials {
   type: string;
 }
 
+interface UserData {
+  u_id: string;
+  k_id: string;
+  role: string;
+}
+
 // [for fab net -1]
-export const org1Env= {
+export const org1Env = {
   CORE_PEER_LOCALMSPID: "Org1MSP",
   CORE_PEER_ADDRESS: "peer0.org1.example.com:7051",
   CORE_PEER_MSPCONFIGPATH:
@@ -48,25 +70,28 @@ export const org2Env = {
     "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 };
 
-
 // [for fab net -2] possible errors
 export const org3Env = {
   CORE_PEER_LOCALMSPID: "Org1MSP",
   CORE_PEER_ADDRESS: "peer0.org1.example.com:8001",
-  CORE_PEER_MSPCONFIGPATH: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
-  CORE_PEER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt",
-  ORDERER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+  CORE_PEER_MSPCONFIGPATH:
+    "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
+  CORE_PEER_TLS_ROOTCERT_FILE:
+    "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt",
+  ORDERER_TLS_ROOTCERT_FILE:
+    "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 };
 
 export const org4Env = {
   CORE_PEER_LOCALMSPID: "Org2MSP",
   CORE_PEER_ADDRESS: "peer0.org2.example.com:10004",
-  CORE_PEER_MSPCONFIGPATH: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
-  CORE_PEER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt",
-  ORDERER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+  CORE_PEER_MSPCONFIGPATH:
+    "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
+  CORE_PEER_TLS_ROOTCERT_FILE:
+    "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt",
+  ORDERER_TLS_ROOTCERT_FILE:
+    "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 };
-
-
 
 export interface IHealthCareInfrastructureOptions {
   logLevel?: LogLevelDesc;
@@ -85,7 +110,7 @@ export class HealthCareAppDummyInfrastructure {
     return HealthCareAppDummyInfrastructure.CLASS_NAME;
   }
 
-  public get orgCfgDir(): string { // error cause
+  public get orgCfgDir(): string {
     return HealthCareAppDummyInfrastructure.FABRIC_2_AIO_CLI_CFG_DIR;
   }
 
@@ -107,7 +132,7 @@ export class HealthCareAppDummyInfrastructure {
       logLevel: level || "DEBUG",
     });
 
-    this.fabric2 = new FabricTestLedgerV2({ // changed
+    this.fabric2 = new FabricTestLedgerV2({
       logLevel: level || "DEBUG",
     });
   }
@@ -152,15 +177,19 @@ export class HealthCareAppDummyInfrastructure {
       FABRIC_LOGGING_SPEC: "debug",
       CORE_PEER_LOCALMSPID: "Org1MSP",
 
-      ORDERER_CA: "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+      ORDERER_CA:
+        "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 
-      FABRIC_CFG_PATH: "../../../../../../../fabric-samples",      
+      FABRIC_CFG_PATH: "../../../../../../../fabric-samples",
       CORE_PEER_TLS_ENABLED: "true",
       CORE_PEER_ADDRESS: "peer0.org1.example.com:8001",
 
-      CORE_PEER_MSPCONFIGPATH: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
-      CORE_PEER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt",
-      ORDERER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+      CORE_PEER_MSPCONFIGPATH:
+        "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
+      CORE_PEER_TLS_ROOTCERT_FILE:
+        "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt",
+      ORDERER_TLS_ROOTCERT_FILE:
+        "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
     };
   }
 
@@ -170,23 +199,25 @@ export class HealthCareAppDummyInfrastructure {
       FABRIC_LOGGING_SPEC: "debug",
       CORE_PEER_LOCALMSPID: "Org2MSP",
 
-      FABRIC_CFG_PATH: "../../../../../../../fabric-samples", 
+      FABRIC_CFG_PATH: "../../../../../../../fabric-samples",
       CORE_PEER_TLS_ENABLED: "true",
-      ORDERER_CA: "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+      ORDERER_CA:
+        "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
 
       CORE_PEER_ADDRESS: "peer0.org2.example.com:10004",
-      CORE_PEER_MSPCONFIGPATH: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
-      CORE_PEER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt",
-      ORDERER_TLS_ROOTCERT_FILE: "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
+      CORE_PEER_MSPCONFIGPATH:
+        "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
+      CORE_PEER_TLS_ROOTCERT_FILE:
+        "../../../../../../../fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt",
+      ORDERER_TLS_ROOTCERT_FILE:
+        "../../../../../../../fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",
     };
   }
 
   public async start(): Promise<void> {
     try {
       this.log.info(`Starting Healthcare infrastructure...`);
-      await Promise.all([
-        this.fabric1.start()
-      ]);
+      await Promise.all([this.fabric1.start()]);
       this.log.info(`Started Healthcare infrastructure OK`);
     } catch (ex) {
       this.log.error(`Starting of Healthcare infrastructure crashed: `, ex);
@@ -198,7 +229,7 @@ export class HealthCareAppDummyInfrastructure {
     try {
       this.log.info(`Stopping...`);
       await Promise.all([
-        this.fabric1.stop().then(() => this.fabric1.destroy())
+        this.fabric1.stop().then(() => this.fabric1.destroy()),
       ]);
       this.log.info(`Stopped OK`);
     } catch (ex) {
@@ -209,20 +240,13 @@ export class HealthCareAppDummyInfrastructure {
 
   public async createFabric1LedgerConnector(): Promise<PluginLedgerConnectorFabric> {
     const connectionProfileOrg1 = await this.fabric1.getConnectionProfileOrg1();
+
+    const users = networkData1.Users;
+
     const enrollAdminOutOrg1 = await this.fabric1.enrollAdminV2({
       organization: "org1",
     });
     const adminWalletOrg1 = enrollAdminOutOrg1[1];
-    const [userIdentity1] = await this.fabric1.enrollUserV2({
-      wallet: adminWalletOrg1,
-      enrollmentID: "userA",
-      organization: "org1",
-    });
-    const [userIdentity2] = await this.fabric1.enrollUserV2({
-      wallet: adminWalletOrg1,
-      enrollmentID: "userB",
-      organization: "org1",
-    });
 
     const enrollAdminOutOrg2 = await this.fabric1.enrollAdminV2({
       organization: "org2",
@@ -230,32 +254,52 @@ export class HealthCareAppDummyInfrastructure {
     const adminWalletOrg2 = enrollAdminOutOrg2[1];
     const [bridgeIdentity] = await this.fabric1.enrollUserV2({
       wallet: adminWalletOrg2,
-      enrollmentID: "bridge1",
+      enrollmentID: "userXOrg2",
       organization: "org2",
     });
 
     const sshConfig = await this.fabric1.getSshConfig();
 
-    const keychainEntryKey1 = "userA";
-    const keychainEntryValue1 = JSON.stringify(userIdentity1);
+    let keychainEntries: { [key: string]: any } = {};
 
-    const keychainEntryKey2 = "userB";
-    const keychainEntryValue2 = JSON.stringify(userIdentity2);
-
-    const keychainEntryKey3 = "bridge1";
-    const keychainEntryValue3 = JSON.stringify(bridgeIdentity);
-    const keychainEntries = {
-      [keychainEntryKey1]: keychainEntryValue1,
-      [keychainEntryKey2]: keychainEntryValue2,
-      [keychainEntryKey3]: keychainEntryValue3
+    const registerUsers = async (arr: any) => {
+      for (let i = 0; i < arr.length; i++) {
+        const { u_id, k_id, role, capabilities } = arr[i];
+        const [userIdentity] = await this.fabric1.enrollUserV2({
+          wallet: adminWalletOrg1,
+          enrollmentID: u_id,
+          organization: "org1",
+          roles: [role],
+          capabilities: capabilities,
+        });
+        const keychainEntryKey = k_id;
+        const keychainEntryValue = JSON.stringify(userIdentity);
+        keychainEntries[keychainEntryKey] = keychainEntryValue;
+      }
     };
+    await registerUsers(users);
+    const keychainEntryKey = "bridge";
+    const keychainEntryValue = JSON.stringify(bridgeIdentity);
+    keychainEntries[keychainEntryKey] = keychainEntryValue;
+    const keychainEntryKeyAdmin1 = "adminOrg1";
+    const keychainEntryAdmin1Value = JSON.stringify(enrollAdminOutOrg1[0]);
+    keychainEntries[keychainEntryKeyAdmin1] = keychainEntryAdmin1Value;
+    const keychainEntryKeyAdmin2 = "adminOrg2";
+    const keychainEntryAdmin2Value = JSON.stringify(enrollAdminOutOrg2[0]);
+    keychainEntries[keychainEntryKeyAdmin2] = keychainEntryAdmin2Value;
 
     const formattedEntries = Object.fromEntries(
       Object.entries(keychainEntries).map(([key, value]) => {
         const entry: EntryWithCredentials = JSON.parse(value);
         if (entry.credentials) {
-          entry.credentials.certificate = formatSquare(entry.credentials.certificate, 64);
-          entry.credentials.privateKey = formatSquare(entry.credentials.privateKey, 64);
+          entry.credentials.certificate = formatSquare(
+            entry.credentials.certificate,
+            64
+          );
+          entry.credentials.privateKey = formatSquare(
+            entry.credentials.privateKey,
+            64
+          );
         }
         return [key, JSON.stringify(entry)];
       })
@@ -263,40 +307,43 @@ export class HealthCareAppDummyInfrastructure {
 
     function formatSquare(str: string, n: number): string {
       const numOfLines = Math.ceil(str.length / n);
-      let formattedStr = '';
+      let formattedStr = "";
       for (let i = 0; i < numOfLines; i++) {
-        formattedStr += str.substring(i * n, (i + 1) * n) + (i < numOfLines - 1 ? '\\n' : '');
+        formattedStr +=
+          str.substring(i * n, (i + 1) * n) + (i < numOfLines - 1 ? "\\n" : "");
       }
       return formattedStr;
     }
 
-    const dirPath = path.join(__dirname, 'user_keys_1');
-    const filePath = path.join(dirPath, 'keychainEntries-net-1.json');
+    const dirPath = path.join(__dirname, "user_keys_1");
+    const filePath = path.join(dirPath, "keychainEntries-net-1.json");
     const jsonString = JSON.stringify(formattedEntries, null, 2);
 
     fs.mkdir(dirPath, { recursive: true }, (err) => {
       if (err) {
-          console.error("An error occurred while creating the directory user_keys_1:", err);
-          return;
+        console.error(
+          "An error occurred while creating the directory user_keys_1:",
+          err
+        );
+        return;
       }
       fs.writeFile(filePath, jsonString, (writeErr) => {
-          if (writeErr) {
-              console.error("An error occurred while writing to the JSON file:", writeErr);
-              return;
-          }
-          console.log("Keychain entries have been saved to:", filePath);
+        if (writeErr) {
+          console.error(
+            "An error occurred while writing to the JSON file:",
+            writeErr
+          );
+          return;
+        }
+        console.log("Keychain entries have been saved to:", filePath);
       });
-  });
+    });
 
     const keychainPlugin = new PluginKeychainMemory({
       instanceId: uuidv4(),
       keychainId: CryptoMaterial.keychains.keychain1.id,
       logLevel: undefined,
-      backend: new Map([
-        [keychainEntryKey1, keychainEntryValue1],
-        [keychainEntryKey2, keychainEntryValue2],
-        [keychainEntryKey3, keychainEntryValue3],
-      ]),
+      backend: new Map(Object.entries(keychainEntries)),
     });
 
     const pluginRegistry = new PluginRegistry({ plugins: [keychainPlugin] });
@@ -323,57 +370,64 @@ export class HealthCareAppDummyInfrastructure {
     });
   }
 
-  // possible errors
   public async createFabric2LedgerConnector(): Promise<PluginLedgerConnectorFabric> {
     const connectionProfileOrg1 = await this.fabric2.getConnectionProfileOrg1();
+    const users = networkData2.Users;
     const enrollAdminOutOrg1 = await this.fabric2.enrollAdminV2({
       organization: "org1",
     });
     const adminWalletOrg1 = enrollAdminOutOrg1[1];
-    const [userIdentity1] = await this.fabric2.enrollUserV2({
-      wallet: adminWalletOrg1,
-      enrollmentID: "userA",
-      organization: "org1",
-    });
-    const [userIdentity2] = await this.fabric2.enrollUserV2({
-      wallet: adminWalletOrg1,
-      enrollmentID: "userY",
-      organization: "org1",
-    });
-
     const enrollAdminOutOrg2 = await this.fabric2.enrollAdminV2({
       organization: "org2",
     });
     const adminWalletOrg2 = enrollAdminOutOrg2[1];
     const [bridgeIdentity] = await this.fabric2.enrollUserV2({
       wallet: adminWalletOrg2,
-      enrollmentID: "bridge2",
+      enrollmentID: "userYOrg2",
       organization: "org2",
     });
 
     const sshConfig = await this.fabric2.getSshConfig();
-    this.log.info("sshConfig details : ",sshConfig);
-    const keychainEntryKey1 = "userA";
-    const keychainEntryValue1 = JSON.stringify(userIdentity1);
-
-    const keychainEntryKey2 = "userY";
-    const keychainEntryValue2 = JSON.stringify(userIdentity2);
-
-    const keychainEntryKey3 = "bridge2";
-    const keychainEntryValue3 = JSON.stringify(bridgeIdentity);
-
-    const keychainEntries = {
-      [keychainEntryKey1]: keychainEntryValue1,
-      [keychainEntryKey2]: keychainEntryValue2,
-      [keychainEntryKey3]: keychainEntryValue3
+    this.log.info("sshConfig details : ", sshConfig);
+    let keychainEntries: { [key: string]: any } = {};
+    const registerUsers = async (arr: any) => {
+      for (let i = 0; i < arr.length; i++) {
+        const { u_id, k_id, role, capabilities } = arr[i];
+        const [userIdentity] = await this.fabric2.enrollUserV2({
+          wallet: adminWalletOrg1,
+          enrollmentID: u_id,
+          organization: "org1",
+          roles: [role],
+          capabilities: capabilities,
+        });
+        const keychainEntryKey = k_id;
+        const keychainEntryValue = JSON.stringify(userIdentity);
+        keychainEntries[keychainEntryKey] = keychainEntryValue;
+      }
     };
-  
+    await registerUsers(users);
+    const keychainEntryKey = "bridge";
+    const keychainEntryValue = JSON.stringify(bridgeIdentity);
+    keychainEntries[keychainEntryKey] = keychainEntryValue;
+    const keychainEntryKeyAdmin1 = "adminOrg1";
+    const keychainEntryAdmin1Value = JSON.stringify(enrollAdminOutOrg1[0]);
+    keychainEntries[keychainEntryKeyAdmin1] = keychainEntryAdmin1Value;
+    const keychainEntryKeyAdmin2 = "adminOrg2";
+    const keychainEntryAdmin2Value = JSON.stringify(enrollAdminOutOrg2[0]);
+    keychainEntries[keychainEntryKeyAdmin2] = keychainEntryAdmin2Value;
+
     const formattedEntries = Object.fromEntries(
       Object.entries(keychainEntries).map(([key, value]) => {
         const entry: EntryWithCredentials = JSON.parse(value);
         if (entry.credentials) {
-          entry.credentials.certificate = formatSquare(entry.credentials.certificate, 64);
-          entry.credentials.privateKey = formatSquare(entry.credentials.privateKey, 64);
+          entry.credentials.certificate = formatSquare(
+            entry.credentials.certificate,
+            64
+          );
+          entry.credentials.privateKey = formatSquare(
+            entry.credentials.privateKey,
+            64
+          );
         }
         return [key, JSON.stringify(entry)];
       })
@@ -381,40 +435,43 @@ export class HealthCareAppDummyInfrastructure {
 
     function formatSquare(str: string, n: number): string {
       const numOfLines = Math.ceil(str.length / n);
-      let formattedStr = '';
+      let formattedStr = "";
       for (let i = 0; i < numOfLines; i++) {
-        formattedStr += str.substring(i * n, (i + 1) * n) + (i < numOfLines - 1 ? '\\n' : '');
+        formattedStr +=
+          str.substring(i * n, (i + 1) * n) + (i < numOfLines - 1 ? "\\n" : "");
       }
       return formattedStr;
     }
 
-    const dirPath = path.join(__dirname, 'user_keys_2');
-    const filePath = path.join(dirPath, 'keychainEntries-net-2.json');
+    const dirPath = path.join(__dirname, "user_keys_2");
+    const filePath = path.join(dirPath, "keychainEntries-net-2.json");
     const jsonString = JSON.stringify(formattedEntries, null, 2);
-    
+
     fs.mkdir(dirPath, { recursive: true }, (err) => {
       if (err) {
-          console.error("An error occurred while creating the directory user_keys_2:", err);
-          return;
+        console.error(
+          "An error occurred while creating the directory user_keys_2:",
+          err
+        );
+        return;
       }
       fs.writeFile(filePath, jsonString, (writeErr) => {
-          if (writeErr) {
-              console.error("An error occurred while writing to the JSON file:", writeErr);
-              return;
-          }
-          console.log("Keychain entries have been saved to:", filePath);
+        if (writeErr) {
+          console.error(
+            "An error occurred while writing to the JSON file:",
+            writeErr
+          );
+          return;
+        }
+        console.log("Keychain entries have been saved to:", filePath);
       });
-  });
+    });
 
     const keychainPlugin2 = new PluginKeychainMemory({
       instanceId: uuidv4(),
       keychainId: CryptoMaterial.keychains.keychain2.id,
       logLevel: undefined,
-      backend: new Map([
-        [keychainEntryKey1, keychainEntryValue1],
-        [keychainEntryKey2, keychainEntryValue2],
-        [keychainEntryKey3, keychainEntryValue3],
-      ]),
+      backend: new Map(Object.entries(keychainEntries)),
     });
 
     const pluginRegistry2 = new PluginRegistry({ plugins: [keychainPlugin2] });
@@ -423,9 +480,9 @@ export class HealthCareAppDummyInfrastructure {
     return new PluginLedgerConnectorFabric({
       instanceId: uuidv4(),
       dockerBinary: "/usr/bin/docker",
-      peerBinary: "../../../../../../../fabric-samples/bin/peer", // changed
-      goBinary: "/usr/bin/go", // done changes
-      pluginRegistry: pluginRegistry2,         
+      peerBinary: "../../../../../../../fabric-samples/bin/peer",
+      goBinary: "/usr/bin/go",
+      pluginRegistry: pluginRegistry2,
       cliContainerEnv: this.org3Env,
       sshConfig,
       connectionProfile: connectionProfileOrg1,
@@ -440,11 +497,11 @@ export class HealthCareAppDummyInfrastructure {
       },
     });
   }
-  
+
   // chaincode deployment in network-A
   public async deployFabricContract1(
-    fabricApiClient: FabricApi,
-  ): Promise<void>{
+    fabricApiClient: FabricApi
+  ): Promise<void> {
     this.log.info("Inside deployFabricContract1...");
 
     const channelId = "mychannel";
@@ -489,6 +546,28 @@ export class HealthCareAppDummyInfrastructure {
         filename,
       });
     }
+    {
+      const filename = "./role-check.js";
+      const relativePath = "./lib/";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
+    {
+      const filename = "./capability-check.js";
+      const relativePath = "./lib/";
+      const filePath = path.join(contractDir, relativePath, filename);
+      const buffer = await fs.readFile(filePath);
+      sourceFiles.push({
+        body: buffer.toString("base64"),
+        filepath: relativePath,
+        filename,
+      });
+    }
     this.log.info("File paths navigated...");
     let retries = 0;
     while (retries <= 5) {
@@ -500,7 +579,7 @@ export class HealthCareAppDummyInfrastructure {
             ccVersion: "1.0.0",
             sourceFiles,
             ccName: contractName,
-            targetOrganizations: [this.org1Env,this.org2Env],
+            targetOrganizations: [this.org1Env, this.org2Env],
             caFile: `${this.orgCfgDir}ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem`,
             ccLabel: "EHRContract",
             ccLang: ChainCodeProgrammingLanguage.Javascript,
@@ -512,7 +591,7 @@ export class HealthCareAppDummyInfrastructure {
           {
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
-          },
+          }
         )
         .then(async (res: { data: { packageIds: any; lifecycle: any } }) => {
           retries = 6;
@@ -531,22 +610,22 @@ export class HealthCareAppDummyInfrastructure {
           Checks.truthy(packageIds, `packageIds truthy OK`);
           Checks.truthy(
             Array.isArray(packageIds),
-            `Array.isArray(packageIds) truthy OK`,
+            `Array.isArray(packageIds) truthy OK`
           );
           Checks.truthy(approveForMyOrgList, `approveForMyOrgList truthy OK`);
           Checks.truthy(
             Array.isArray(approveForMyOrgList),
-            `Array.isArray(approveForMyOrgList) truthy OK`,
+            `Array.isArray(approveForMyOrgList) truthy OK`
           );
           Checks.truthy(installList, `installList truthy OK`);
           Checks.truthy(
             Array.isArray(installList),
-            `Array.isArray(installList) truthy OK`,
+            `Array.isArray(installList) truthy OK`
           );
           Checks.truthy(queryInstalledList, `queryInstalledList truthy OK`);
           Checks.truthy(
             Array.isArray(queryInstalledList),
-            `Array.isArray(queryInstalledList) truthy OK`,
+            `Array.isArray(queryInstalledList) truthy OK`
           );
           Checks.truthy(commit, `commit truthy OK`);
           Checks.truthy(packaging, `packaging truthy OK`);
@@ -555,12 +634,12 @@ export class HealthCareAppDummyInfrastructure {
           await fabricApiClient.runTransactionV1({
             contractName,
             channelName,
-            params: [ ],
+            params: [],
             methodName: "InitLedger",
             invocationType: FabricContractInvocationType.Send,
             signingCredential: {
               keychainId: CryptoMaterial.keychains.keychain1.id,
-              keychainRef: "userA",
+              keychainRef: "adminOrg1",
             },
           });
         })

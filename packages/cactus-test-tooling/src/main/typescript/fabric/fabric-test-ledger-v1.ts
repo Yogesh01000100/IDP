@@ -49,6 +49,8 @@ export interface EnrollFabricIdentityOptionsV1 {
   readonly wallet: Wallet;
   readonly enrollmentID: string;
   readonly organization: string;
+  readonly roles?: string[];
+  readonly capabilities?: string[];
 }
 
 /*
@@ -157,7 +159,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
 
     if (compareVersions.compare(this.getFabricVersion(), "1.4", "<"))
       this.log.warn(
-        `This version of Fabric ${this.getFabricVersion()} is unsupported`,
+        `This version of Fabric ${this.getFabricVersion()} is unsupported`
       );
 
     this.useRunningLedger = Bools.isBooleanStrict(options.useRunningLedger)
@@ -195,7 +197,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
   }
 
   public async createCaClientV2(
-    organization: string,
+    organization: string
   ): Promise<FabricCAServices> {
     const fnTag = `${this.className}#createCaClientV2()`;
     this.log.debug(`${fnTag} ENTER`);
@@ -233,7 +235,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     Checks.nonBlankString(opts.enrollmentID, "enrollUserV2 opts.enrollmentID");
     Checks.truthy(opts.wallet, "enrollUserV2 opts.wallet");
 
-    const { enrollmentID, organization, wallet } = opts;
+    const { enrollmentID, organization, wallet, roles, capabilities } = opts;
     try {
       const mspId = this.capitalizedMspIdOfOrg(organization);
       const connectionProfile =
@@ -258,7 +260,22 @@ export class FabricTestLedgerV1 implements ITestLedger {
         affiliation: opts.organization + ".department1",
         enrollmentID: opts.enrollmentID,
         role: "client",
+        attrs: [
+          { name: "role", value: `${roles}`, ecert: true },
+          { name: "capabilities", value: `${capabilities}`, ecert: true },
+        ],
       };
+
+      const capabilitiesArray = registrationRequest.attrs.find(
+        (attr) => attr.name === "Capabilities"
+      );
+      if (capabilitiesArray) {
+        console.log("Capabilities:", capabilitiesArray.value.split(","));
+      } else {
+        console.log(
+          "No 'Capabilities' attribute found in the registration request."
+        );
+      }
 
       const provider = opts.wallet
         .getProviderRegistry()
@@ -314,7 +331,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
   }
 
   public async enrollAdminV2(
-    opts: Partial<EnrollFabricIdentityOptionsV1>,
+    opts: Partial<EnrollFabricIdentityOptionsV1>
   ): Promise<[X509Identity, Wallet]> {
     const fnTag = `${this.className}#enrollAdminV2()`;
     this.log.debug(`${fnTag} ENTER`);
@@ -378,7 +395,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     const ccpJsonPath = compareVersions.compare(
       this.getFabricVersion(),
       "2.0",
-      "<",
+      "<"
     )
       ? CCP_JSON_PATH_FABRIC_V1
       : CCP_JSON_PATH_FABRIC_V2;
@@ -425,7 +442,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
       const ordererPemPath = compareVersions.compare(
         this.getFabricVersion(),
         "2.0",
-        "<",
+        "<"
       )
         ? ORDERER_PEM_PATH_FABRIC_V1
         : ORDERER_PEM_PATH_FABRIC_V2;
@@ -482,13 +499,13 @@ export class FabricTestLedgerV1 implements ITestLedger {
             "fabric-samples/test-network",
             "organizations/peerOrganizations",
             orgName + ".example.com",
-            "connection-" + orgName + ".json",
+            "connection-" + orgName + ".json"
           )
         : path.join(
             "add-org-" + orgName,
             "organizations/peerOrganizations",
             orgName + ".example.com",
-            "connection-" + orgName + ".json",
+            "connection-" + orgName + ".json"
           );
     const peer0Name = `peer0.${orgName}.example.com`;
     const peer1Name = `peer1.${orgName}.example.com`;
@@ -500,7 +517,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     const ccpJsonPath = compareVersions.compare(
       this.getFabricVersion(),
       "2.0",
-      "<",
+      "<"
     )
       ? CCP_JSON_PATH_FABRIC_V1
       : CCP_JSON_PATH_FABRIC_V2;
@@ -525,7 +542,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
 
         const hostPortPeer1 = await Containers.getPublicPort(
           privatePortPeer1,
-          cInfo,
+          cInfo
         );
         ccp["peers"][peer1Name]["url"] = `grpcs://localhost:${hostPortPeer1}`;
       }
@@ -560,7 +577,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         const ordererPemPath = compareVersions.compare(
           this.getFabricVersion(),
           "2.0",
-          "<",
+          "<"
         )
           ? ORDERER_PEM_PATH_FABRIC_V1
           : ORDERER_PEM_PATH_FABRIC_V2;
@@ -617,7 +634,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     templateType: string,
     orgName: string,
     port: string,
-    destinationPath: string,
+    destinationPath: string
   ): Promise<any> {
     const fnTag = `FabricTestLedger#populateFile()`;
     const { log } = this;
@@ -716,7 +733,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           createdFile.filename = `docker-compose-couch-${orgName}.yaml`;
           createdFile.filepath = path.join(
             destinationPath,
-            createdFile.filename,
+            createdFile.filename
           );
           createdFile.body = dumpCouch;
           await fs.promises.writeFile(createdFile.filepath, createdFile.body);
@@ -845,7 +862,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           createdFile.filename = `docker-compose-${orgName}.yaml`;
           createdFile.filepath = path.join(
             destinationPath,
-            createdFile.filename,
+            createdFile.filename
           );
           createdFile.body = newCompose;
 
@@ -902,7 +919,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           createdFile.filename = `docker-compose-ca-${orgName}.yaml`;
           createdFile.filepath = path.join(
             destinationPath,
-            createdFile.filename,
+            createdFile.filename
           );
           createdFile.body = dumpCa;
           log.debug(`Created file at ${createdFile.filepath}`);
@@ -935,7 +952,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           createdFile.filename = `${orgName}-crypto.yaml`;
           createdFile.filepath = path.join(
             destinationPath,
-            createdFile.filename,
+            createdFile.filename
           );
           createdFile.body = dumpCrypto;
           log.debug(`Created file at ${createdFile.filepath}`);
@@ -1002,7 +1019,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           const regexName = new RegExp(/Name:/g);
           replacedConfigTx = replacedConfigTx.replace(
             regexName,
-            `&${orgName}\n    Name: `,
+            `&${orgName}\n    Name: `
           );
 
           log.debug(replacedConfigTx);
@@ -1013,7 +1030,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           createdFile.filename = `configtx.yaml`;
           createdFile.filepath = path.join(
             destinationPath,
-            createdFile.filename,
+            createdFile.filename
           );
           createdFile.body = replacedConfigTx;
           log.debug(`Created file at ${createdFile.filepath}`);
@@ -1061,7 +1078,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         this.extraOrgs[i].orgChannel,
         this.extraOrgs[i].certificateAuthority,
         this.extraOrgs[i].stateDatabase,
-        this.extraOrgs[i].port,
+        this.extraOrgs[i].port
       );
     }
   }
@@ -1073,7 +1090,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     channel = "mychannel",
     certificateAuthority: boolean,
     database: string,
-    peerPort = "11051",
+    peerPort = "11051"
   ): Promise<void> {
     const fnTag = `FabricTestLedger#addOrgX()`;
     const { log } = this;
@@ -1089,7 +1106,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
 
     if (this.stateDatabase !== database) {
       log.warn(
-        "Adding an organization with a different state database than org1 and org2",
+        "Adding an organization with a different state database than org1 and org2"
       );
     }
 
@@ -1120,7 +1137,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         "couch",
         orgName,
         couchDbPort,
-        tmpDirPath,
+        tmpDirPath
       );
 
       const caFile = await this.populateFile(
@@ -1128,7 +1145,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         "ca",
         orgName,
         caPort,
-        tmpDirPath,
+        tmpDirPath
       );
 
       const composeFile = await this.populateFile(
@@ -1136,7 +1153,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         "compose",
         orgName,
         peerPort,
-        tmpDirPath,
+        tmpDirPath
       );
 
       const cryptoFile = await this.populateFile(
@@ -1144,7 +1161,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         "crypto",
         orgName,
         peerPort,
-        tmpDirPath,
+        tmpDirPath
       );
 
       const configTxGenFile = await this.populateFile(
@@ -1152,7 +1169,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
         "configTxGen",
         orgName,
         peerPort,
-        tmpDirPath,
+        tmpDirPath
       );
 
       const sourceFiles = [
@@ -1235,7 +1252,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           cmd,
           label,
           ssh,
-          sshCmdOptionsDocker,
+          sshCmdOptionsDocker
         );
         log.debug(`${label} executed: ${JSON.stringify(response)}`);
       }
@@ -1249,7 +1266,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           cmd,
           label,
           ssh,
-          sshCmdOptionsDocker,
+          sshCmdOptionsDocker
         );
         log.debug(`${label} executed: ${response.stdout}`);
       }
@@ -1289,7 +1306,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
     cmd: string,
     label: string,
     ssh: NodeSSH,
-    sshCmdOptions: SSHExecCommandOptions,
+    sshCmdOptions: SSHExecCommandOptions
   ): Promise<SSHExecCommandResponse> {
     this.log.debug(`${label} CMD: ${cmd}`);
     const cmdRes = await ssh.execCommand(cmd, sshCmdOptions);
@@ -1303,15 +1320,15 @@ export class FabricTestLedgerV1 implements ITestLedger {
 
     if (this.useRunningLedger) {
       this.log.info(
-        "Search for already running Fabric Test Ledger because 'useRunningLedger' flag is enabled.",
+        "Search for already running Fabric Test Ledger because 'useRunningLedger' flag is enabled."
       );
       this.log.info(
         "Search criteria - image name: ",
         containerNameAndTag,
-        ", state: running",
+        ", state: running"
       );
       const containerInfo = await Containers.getByPredicate(
-        (ci) => ci.Image === containerNameAndTag && ci.State === "running",
+        (ci) => ci.Image === containerNameAndTag && ci.State === "running"
       );
       const docker = new Docker();
       this.containerId = containerInfo.Id;
@@ -1337,7 +1354,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           return this.container;
         } else {
           throw new Error(
-            `Cannot set container ID without a running test ledger`,
+            `Cannot set container ID without a running test ledger`
           );
         }
       }
@@ -1424,7 +1441,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
           if (err) {
             reject(err);
           }
-        },
+        }
       );
 
       eventEmitter.once("start", async (container: Container) => {
@@ -1450,7 +1467,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
                 this.extraOrgs[i].orgChannel,
                 this.extraOrgs[i].certificateAuthority,
                 this.extraOrgs[i].stateDatabase,
-                this.extraOrgs[i].port,
+                this.extraOrgs[i].port
               );
             }
           }
@@ -1488,7 +1505,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
       return Containers.stop(this.container);
     } else {
       return Promise.reject(
-        new Error(`Container was never created, nothing to stop.`),
+        new Error(`Container was never created, nothing to stop.`)
       );
     }
   }
@@ -1498,7 +1515,7 @@ export class FabricTestLedgerV1 implements ITestLedger {
 
     if (this.useRunningLedger) {
       this.log.info(
-        "Ignore destroy request because useRunningLedger is enabled.",
+        "Ignore destroy request because useRunningLedger is enabled."
       );
       return Promise.resolve();
     }

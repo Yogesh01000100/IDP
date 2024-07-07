@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { AddressInfo } from "net";
 import { v4 as uuidv4 } from "uuid";
 import { Server } from "http";
@@ -8,7 +7,7 @@ import { LogLevelDesc, Logger, LoggerProvider, Servers } from "@hyperledger/cact
 import { ApiServer, AuthorizationProtocol, ConfigService, ICactusApiServerOptions } from "@hyperledger/cactus-cmd-api-server";
 import { Configuration, DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-connector-fabric";
 import { PluginKeychainMemory } from "@hyperledger/cactus-plugin-keychain-memory";
-import { HealthCareAppDummyInfrastructure, org1Env, org2Env } from "./infrastructure/infrastructure";
+import { HealthCareAppDummyInfrastructure } from "./infrastructure/infrastructure";
 import CryptoMaterial from "../../crypto-material/crypto-material.json";
 import { HealthCareCactusPlugin } from "../../../../cactus-healthcare-business-logic-plugin";
 
@@ -88,9 +87,7 @@ export class HealthCareApp {
         new HealthCareCactusPlugin({
           logLevel: "INFO",
           instanceId: uuidv4(),
-          fabricApiClient1,  
-          fabricApiClient2
-          //fabricEnvironment: org1Env,
+          fabricApiClient: fabricApiClient1,
         }),
       ],
     });
@@ -102,13 +99,11 @@ export class HealthCareApp {
           instanceId: uuidv4(),
           logLevel: "INFO",
         }),
-        fabricPlugin2,// possible cause of problem
+        fabricPlugin2,
         new HealthCareCactusPlugin({
           logLevel: "INFO",
           instanceId: uuidv4(),
-          fabricApiClient1,
-          fabricApiClient2
-          //fabricEnvironment: org2Env,
+          fabricApiClient: fabricApiClient2,
         }),
       ],
     });

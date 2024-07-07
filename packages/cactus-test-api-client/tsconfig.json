@@ -16,28 +16,7 @@
       "path": "../cactus-api-client/tsconfig.json"
     },
     {
-      "path": "../cactus-verifier-client/tsconfig.json"
-    },
-    {
       "path": "../cactus-cmd-api-server/tsconfig.json"
     },
-    {
-      "path": "../cactus-common/tsconfig.json"
-    },
-    {
-      "path": "../cactus-core/tsconfig.json"
-    },
-    {
-      "path": "../cactus-core-api/tsconfig.json"
-    },
-    {
-      "path": "../cactus-plugin-consortium-manual/tsconfig.json"
-    },
-    {
-      "path": "../cactus-plugin-ledger-connector-quorum/tsconfig.json"
-    },
-    {
-      "path": "../cactus-test-tooling/tsconfig.json"
-    }
   ]
 }

@@ -3,154 +3,98 @@
   "info": {
     "title": "Hyperledger Cactus Example - Health Care EHR App",
     "description": "Demonstrates EHR management across multiple distinct Hyperledger Fabric ledgers.",
-    "version": "v2.0.0-alpha.2",
-    "license": {
-      "name": "Apache-2.0",
-      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
-    }
+    "version": "v1.0"
   },
   "components": {
     "schemas": {
-      "HospitalNetworkA": {
+      "GetMyProfilePatientResponseHSPA": {
         "type": "object",
-        "required": ["id", "HIdB"],
         "properties": {
-          "id": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
+          "u_id": {
+            "type": "string"
           },
-          "HIdB": {
-            "description": "The foreign key ID referencing the corresponding entry in HospitalNetworkB.",
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 1024,
-            "nullable": false
-          }
-        }
-      },
-      "HospitalNetworkB": {
-        "type": "object",
-        "required": ["id"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": false,
-            "minLength": 1,
-            "maxLength": 1024
-          }
-        }
-      },
-      "InsertDataRequest": {
-        "type": "object",
-        "required": ["data"],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HospitalNetworkA"
-          }
-        }
-      },
-      "InsertDataResponseHSPA": {
-        "type": "object",
-        "properties": {
-          "callOutput": {
-            "type": "object",
-            "additionalProperties": true
+          "role": {
+            "type": "string"
           },
-          "transactionReceipt": {
-            "type": "object",
-            "additionalProperties": true
-          }
-        }
-      },
-      "ListHSPAResponse": {
-        "type": "object",
-        "required": ["data"],
-        "properties": {
-          "data": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "capabilities": {
             "type": "array",
-            "nullable": false,
-            "default": [],
             "items": {
-              "$ref": "#/components/schemas/HospitalNetworkA"
-            },
-            "minItems": 0,
-            "maxItems": 65535
+              "type": "string"
+            }
           }
-        }
+        },
+        "description": "Response containing patient profile information, including contact and network details."
       },
-      "ListHSPBResponse": {
+      "GetMyProfilePatientResponseHSPB": {
         "type": "object",
-        "required": ["data"],
         "properties": {
-          "data": {
+          "u_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "capabilities": {
             "type": "array",
-            "nullable": false,
-            "default": [],
             "items": {
-              "$ref": "#/components/schemas/HospitalNetworkB"
-            },
-            "minItems": 0,
-            "maxItems": 65535
+              "type": "string"
+            }
           }
-        }
+        },
+        "description": "Response containing patient profile information, including contact and network details."
       }
     }
   },
   "paths": {
-    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa": {
-      "post": {
-        "x-hyperledger-cactus": {
-          "http": {
-            "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/insert-patient-hspa"
-          }
-        },
-        "operationId": "InsertDataRequestV1",
-        "summary": "Inserts the provided data to the ledger A",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InsertDataRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "CREATED",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InsertDataResponseHSPA"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa": {
+    "/api/cactus-healthcare-backend/get-my-profile-patient-hspa": {
       "get": {
         "x-hyperledger-cactus": {
           "http": {
             "verbLowerCase": "get",
-            "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspa"
+            "path": "/api/cactus-healthcare-backend/get-my-profile-patient-hspa"
           }
         },
-        "operationId": "listDataN1",
-        "summary": "Lists Patient's EHR stored on the ledger A",
-        "parameters": [],
+        "operationId": "getMyProfilePatientHSPA",
+        "summary": "Get My Profile",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListHSPAResponse"
+                  "$ref": "#/components/schemas/GetMyProfilePatientResponseHSPA"
                 }
               }
             }
@@ -158,30 +102,29 @@
         }
       }
     },
-    "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb": {
-        "get": {
-          "x-hyperledger-cactus": {
-            "http": {
-              "verbLowerCase": "get",
-              "path": "/api/v1/plugins/@hyperledger/cactus-healthcare-backend/list-patient-hspb"
-            }
-          },
-          "operationId": "listDataN2",
-          "summary": "Lists Patient's EHR stored on the ledger B",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "OK",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/ListHSPBResponse"
-                  }
+    "/api/cactus-healthcare-backend/get-my-profile-patient-hspb": {
+      "get": {
+        "x-hyperledger-cactus": {
+          "http": {
+            "verbLowerCase": "get",
+            "path": "/api/cactus-healthcare-backend/get-my-profile-patient-hspb"
+          }
+        },
+        "operationId": "getMyProfilePatientHSPB",
+        "summary": "Get My Profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyProfilePatientResponseHSPB"
                 }
               }
             }
           }
         }
       }
+    }
   }
 }

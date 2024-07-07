@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import OAS from "../../json/openapi.json";// to be done
+import OAS from "../../json/openapi.json";
 
 
 import { Express } from "express";
@@ -20,9 +19,10 @@ import { DefaultApi as FabricApi } from "@hyperledger/cactus-plugin-ledger-conne
 
 //import { IHealthCareContractDeploymentInfo } from "../i-healthcare-contract-deployment-info";
 
-import { InsertDataHspA } from "./web-services/insert-patient-hspa";
-import { ListDataHspA } from "./web-services/list-patient-hspa";
-import { ListDataHspB } from "./web-services/list-patient-hspb";
+
+import { GetMyProfilePatientA } from "./web-services/get-my-profile-patient-hspa";
+import { GetMyProfilePatientB } from "./web-services/get-my-profile-patient-hspb";
+
 import CryptoMaterial from "../../../crypto-material/crypto-material.json";
 
 export interface OrgEnv {
@@ -36,8 +36,7 @@ export interface OrgEnv {
 export interface IHealthCareCactusPluginOptions {
   logLevel?: LogLevelDesc;
   instanceId: string;
-  fabricApiClient1: FabricApi;
-  fabricApiClient2: FabricApi;
+  fabricApiClient: FabricApi;
   fabricEnvironment?: NodeJS.ProcessEnv;
 }
 
@@ -61,13 +60,12 @@ export class HealthCareCactusPlugin
     Checks.truthy(options, `${fnTag} arg options`);
     Checks.truthy(options.instanceId, `${fnTag} arg options.instanceId`);
     Checks.nonBlankString(options.instanceId, `${fnTag} options.instanceId`);
-    //Checks.truthy(options.contracts, `${fnTag} arg options.contracts`); // watch for contract variable
     Checks.truthy(
-      options.fabricApiClient1,
+      options.fabricApiClient,
       `${fnTag} arg options.fabricApiClient1`,
     );
     Checks.truthy(
-      options.fabricApiClient2,
+      options.fabricApiClient,
       `${fnTag} arg options.fabricApiClient2`,
     );
 
@@ -93,29 +91,22 @@ export class HealthCareCactusPlugin
     }  
 
     // Endpoints for network 1
-    const insertDataOrg1 = new InsertDataHspA({
+    const getMyProfilePatientNet1  = new GetMyProfilePatientA({
       logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClient1,
-      keychainId: CryptoMaterial.keychains.keychain1.id,
-    });
-
-    const listDataOrg1 = new ListDataHspA({
-      logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClient1,
+      fabricApi: this.options.fabricApiClient,
       keychainId: CryptoMaterial.keychains.keychain1.id,
     });
 
     // Endpoints for network 2
-    const listDataOrg2 = new ListDataHspB({
+    const getMyProfilePatientNet2  = new GetMyProfilePatientB({
       logLevel: this.options.logLevel,
-      fabricApi: this.options.fabricApiClient2,
+      fabricApi: this.options.fabricApiClient,
       keychainId: CryptoMaterial.keychains.keychain2.id,
     });
 
     this.endpoints = [
-      insertDataOrg1,
-      listDataOrg1,
-      listDataOrg2,
+      getMyProfilePatientNet1,
+      getMyProfilePatientNet2
     ];
 
     return this.endpoints;
@@ -130,7 +121,7 @@ export class HealthCareCactusPlugin
   }
 
   public getPackageName(): string {
-    return "@hyperledger/cactus-healthcare-backend";
+    return "@hyperledger/cactus-healthcare-bussiness-logic-plugin";
   }
 
   public async onPluginInit(): Promise<unknown> {

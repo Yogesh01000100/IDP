@@ -1,213 +1,115 @@
-/*
- * Copyright IBM Corp. All Rights Reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
-'use strict';
-const { Contract } = require('fabric-contract-api');
+"use strict";
+const { Contract } = require("fabric-contract-api");
+const {
+  checkPatientRole,
+  checkAsstDoctorRole,
+  checkDoctorRole,
+} = require("./role-check.js");
+const { checkPatientCapability } = require("./capability-check.js");
 
 class EHRContract extends Contract {
+  async InitLedger(ctx) {
+    const networkData = [
+      {
+        u_id: "c84c1dd3-8d65-5ba9-996f-84e9dc9599ae",
+        role: "doctor",
+        first_name: "Sumer",
+        last_name: "Sharma",
+        contact_email: "sumer.sharma@hospital-1.com",
+        contact_phone: "+910494358843",
+        network_id: "HSPA",
+        capabilities: ["c2"],
+      },
+      {
+        u_id: "caba15bf-62f4-56f4-878e-da8e9272a7d8",
+        role: "patient",
+        first_name: "Simran",
+        last_name: "Mishra",
+        contact_email: "simran.mishra@hospital-1.com",
+        contact_phone: "09120432555",
+        network_id: "HSPA",
+        capabilities: ["c1"],
+      },
+    ];
 
-    // Initialize some sample patient records in the ledger
-    async InitLedger(ctx) {
-        const patientRecords = [
-            {
-                id: 'userA',
-                data: {
-                    name: 'Rahul Sharma',
-                    age: 37,
-                    gender: 'Male',
-                    condition: 'Diabetes',
-                    lastVisit: '2021-06-23',
-                    medications: ['Metformin'],
-                    allergies: ['Penicillin'],
-                    bloodType: 'B-',
-                    emergencyContact: {
-                        name: 'Sara Patel',
-                        relation: 'Daughter',
-                        phone: '+911234567893'
-                    },
-                    LabTests: {
-                        testName: 'Hemoglobin A1C',
-                        result: '6.5%',
-                        date: '2023-06-15',
-                        normalRange: '4%-5.6%'
-                    },
-                }
-            },
-            {
-                id: 'userB',
-                data: {
-                    name: 'Vikram Singh',
-                    age: 22,
-                    gender: 'Male',
-                    condition: 'Migraine',
-                    lastVisit: '2022-09-26',
-                    medications: ['Metformin'],
-                    allergies: ['Latex'],
-                    bloodType: 'O+',
-                    emergencyContact: {
-                        name: 'Raj Gupta',
-                        relation: 'Son',
-                        phone: '+911234567890'
-                    }
-                }
-            },
-            {
-                id: 'user2',
-                data: {
-                    name: 'Rohan Bhatnagar',
-                    age: 43,
-                    gender: 'Male',
-                    condition: 'Heart Disease',
-                    lastVisit: '2023-03-27',
-                    medications: ['Metformin'],
-                    allergies: ['None'],
-                    bloodType: 'AB+',
-                    emergencyContact: {
-                        name: 'Raj Gupta',
-                        relation: 'Son',
-                        phone: '+911234567890'
-                    }
-                }
-            },
-            {
-                id: 'user3',
-                data: {
-                    name: 'Simran Mishra',
-                    age: 45,
-                    gender: 'Female',
-                    condition: 'Heart Disease',
-                    lastVisit: '2023-04-08',
-                    medications: ['Albuterol'],
-                    allergies: ['None'],
-                    bloodType: 'O-',
-                    emergencyContact: {
-                        name: 'Raj Gupta',
-                        relation: 'Son',
-                        phone: '+911234567890'
-                    }
-                }
-            },
-            {
-                id: 'user4',
-                data: {
-                    name: 'Simran Mishra',
-                    age: 60,
-                    gender: 'Male',
-                    condition: 'Panic Disorder',
-                    lastVisit: '2021-08-23',
-                    medications: ['Aspirin', 'Lisinopril'],
-                    allergies: ['Pollen'],
-                    bloodType: 'AB-',
-                    emergencyContact: {
-                        name: 'Anita Singh',
-                        relation: 'Wife',
-                        phone: '+911234567891'
-                    }
-                }
-            },
-            {
-                id: 'user5',
-                data: {
-                    name: 'Rahul Sharma',
-                    age: 61,
-                    gender: 'Male',
-                    condition: 'Asthma',
-                    lastVisit: '2022-04-22',
-                    medications: ['Albuterol'],
-                    allergies: ['Pollen'],
-                    bloodType: 'AB+',
-                    emergencyContact: {
-                        name: 'Rohit Reddy',
-                        relation: 'Father',
-                        phone: '+911234567894'
-                    }
-                }
-            }
-        ];
-
-        for (const record of patientRecords) {
-            await ctx.stub.putState(record.id, Buffer.from(JSON.stringify(record)));
-            console.info(`Patient record ${record.id} initialized`);
-        }
+    for (const record of networkData) {
+      await ctx.stub.putState(record.u_id, Buffer.from(JSON.stringify(record)));
+      console.info(`User record ${record.u_id} initialized`);
     }
+  }
 
-    // Create a new patient record
-    async CreatePatientRecord(ctx, patientId, data) {
-        // Check if a patient record with the given ID already exists
-        const exists = await this.PatientRecordExists(ctx, patientId);
-        if (exists) {
-            throw new Error(`The patient record with ID ${patientId} already exists`);
-        }
+  async GetMyProfileDoctor(ctx, user_id) {
+    try {
+      const validUser = await checkDoctorRole(ctx.stub);
 
-        // Create a new record object. Here, 'data' is expected to be an object.
-        const record = { id: patientId, data: data };
+      if (!validUser) {
+        throw new Error("Access denied. Insufficient permissions.");
+      }
 
-        // Save the new record to the ledger
-        // The 'data' object is included in the record and serialized as a JSON string
-        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(record)));
+      const userExists = await this.UserExists(ctx, user_id);
+      if (!userExists) {
+        throw new Error(`The user with ID ${user_id} does not exist`);
+      }
+
+      const userData = await ctx.stub.getState(user_id);
+      const userProfile = JSON.parse(userData.toString());
+
+      return JSON.stringify(userProfile);
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+      throw error;
     }
+  }
 
+  async GetMyProfilePatient(ctx, u_id) {
+    try {
+      const userExists = await this.UserExists(ctx, u_id);
+      if (!userExists) {
+        throw new Error(`The user with ID ${u_id} does not exist`);
+      }
 
-    // Read an existing patient record
-    async ReadPatientRecord(ctx, patientId) {
-        const exists = await this.PatientRecordExists(ctx, patientId);
-        if (!exists) {
-            throw new Error(`The patient record ${patientId} does not exist`);
-        }
+      const userData = await ctx.stub.getState(u_id);
+      const userProfile = JSON.parse(userData.toString());
 
-        const data = await ctx.stub.getState(patientId);
-        return data.toString();
+      return JSON.stringify(userProfile);
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+      throw error;
     }
+  }
 
-    // Check if a patient record exists
-    async PatientRecordExists(ctx, patientId) {
-        const record = await ctx.stub.getState(patientId);
-        return !!record && record.length > 0;
+  async GetMyProfileAssistantDoctor(ctx, user_id) {
+    try {
+      const validUser = await checkAsstDoctorRole(ctx.stub);
+
+      if (!validUser) {
+        throw new Error("Access denied. Insufficient permissions.");
+      }
+
+      const userExists = await this.UserExists(ctx, user_id);
+      if (!userExists) {
+        throw new Error(`The user with ID ${user_id} does not exist`);
+      }
+
+      const userData = await ctx.stub.getState(user_id);
+      const userProfile = JSON.parse(userData.toString());
+
+      return JSON.stringify(userProfile);
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+      throw error;
     }
+  }
 
-    // Get all patient records from the ledger
-    async GetAllPatientRecords(ctx) {
-        const allResults = [];
-        const iterator = await ctx.stub.getStateByRange('', '');
-        let result = await iterator.next();
-        while (!result.done) {
-            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
-            let record;
-            try {
-                record = JSON.parse(strValue);
-            } catch (err) {
-                console.log(err);
-                record = strValue;
-            }
-            allResults.push(record);
-            result = await iterator.next();
-        }
-        return JSON.stringify(allResults);
+  async UserExists(ctx, u_id) {
+    const record = await ctx.stub.getState(u_id);
+    if (!record || record.length === 0) {
+      console.error(`User with ID ${u_id} not found.`);
+      return false;
     }
-
-    // Update an existing patient record
-    async UpdatePatientRecord(ctx, patientId, newRecordData) {
-        const exists = await this.PatientRecordExists(ctx, patientId);
-        if (!exists) {
-            throw new Error(`The patient record ${patientId} does not exist`);
-        }
-
-        const updatedRecord = { id: patientId, data: newRecordData };
-        await ctx.stub.putState(patientId, Buffer.from(JSON.stringify(updatedRecord)));
-    }
-
-    // Delete a patient record
-    async DeletePatientRecord(ctx, patientId) {
-        const exists = await this.PatientRecordExists(ctx, patientId);
-        if (!exists) {
-            throw new Error(`The patient record ${patientId} does not exist`);
-        }
-
-        await ctx.stub.deleteState(patientId);
-    }
+    console.info(`User with ID ${u_id} exists.`);
+    return true;
+  }
 }
 
 module.exports = EHRContract;

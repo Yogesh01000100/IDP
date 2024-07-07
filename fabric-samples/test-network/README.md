@@ -68,7 +68,7 @@ As there is no Docker-Daemon when using podman, only the `./network.sh deployCCA
 
 "orderers": {
     "orderer.example.com": {
-        "url": "grpcs://localhost:8000",
+        "url": "grpc://localhost:8000",
         "tlsCACerts": {
             "pem": "-----BEGIN CERTIFICATE-----\n...certificate contents...\n-----END CERTIFICATE-----\n"
         },
@@ -77,3 +77,7 @@ As there is no Docker-Daemon when using podman, only the `./network.sh deployCCA
         }
     }
 }
+
+{"credentials":{"certificate":"-----BEGIN CERTIFICATE----END PRIVATE KEY-----\r\n"},"mspId":"Org1MSP","type":"X.509","version":1}
+
+// add the "version":1
