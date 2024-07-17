@@ -1,116 +1,123 @@
-"use strict";
+'use strict';
 
-const { Contract } = require("fabric-contract-api");
+const { Contract } = require('fabric-contract-api');
 const {
-  checkPatientRole,
-  checkAsstDoctorRole,
-  checkDoctorRole,
-} = require("./role-check.js");
-const { checkPatientCapability } = require("./capability-check.js");
+    checkABAC1,
+    checkABAC2,
+    checkABAC3,
+    checkABAC4,
+    checkABAC5,
+    checkABAC6,
+    checkABAC7,
+    checkABAC8,
+    checkABAC9,
+    checkABAC10
+} = require('./abac-check.js');
 
 class EHRContract extends Contract {
-  async InitLedger(ctx) {
-    const networkData = [
-      {
-        u_id: "caba15bf-62f4-56f4-878e-da8e9272a7d8",
-        role: "patient",
-        first_name: "Simran",
-        last_name: "mishra",
-        contact_email: "simran.mishra@hospital-2.com",
-        contact_phone: "09120432555",
-        network_id: "HSPB",
-        capabilities: ["c1"],
-      },
-      {
-        u_id: "a72d8410-cecf-578d-8691-8baf307eb127",
-        role: "patient",
-        first_name: "Kiara",
-        last_name: "Kanda",
-        contact_email: "kiara.kanda@hospital-2.com",
-        contact_phone: "8414703241",
-        network_id: "HSPB",
-        capabilities: ["c1"],
-      },
-    ];
+    async InitLedger(ctx) {
+        const hospitalData = {
+            h_id: "hsp1",
+            name: "City Hospital",
+            address: "123 Main St, Metropolis",
+            contact_email: "info@cityhospital.com",
+            contact_phone: "555-123456",
+            network_id: "HSP1",
+            capabilities: ["emergency", "surgery", "pediatrics"],
+        };
 
-    for (const record of networkData) {
-      await ctx.stub.putState(record.u_id, Buffer.from(JSON.stringify(record)));
-      console.info(`User record ${record.u_id} initialized`);
+        await ctx.stub.putState(hospitalData.h_id, Buffer.from(JSON.stringify(hospitalData)));
+        console.info(`Hospital record ${hospitalData.h_id} initialized`);
     }
-  }
 
-  async GetMyProfileDoctor(ctx, user_id) {
-    try {
-      const validUser = await checkDoctorRole(ctx.stub);
-
-      if (!validUser) {
-        throw new Error("Access denied. Insufficient permissions.");
-      }
-
-      const userExists = await this.UserExists(ctx, user_id);
-      if (!userExists) {
-        throw new Error(`The user with ID ${user_id} does not exist`);
-      }
-
-      const userData = await ctx.stub.getState(user_id);
-      const userProfile = JSON.parse(userData.toString());
-
-      return JSON.stringify(userProfile);
-    } catch (error) {
-      console.error("An error occurred:", error.message);
-      throw error;
+    async GenericFunction1(ctx) {
+        const validUser = await checkABAC1(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
     }
-  }
 
-  async GetMyProfilePatient(ctx, u_id) {
-    try {
-      const userExists = await this.UserExists(ctx, u_id);
-      if (!userExists) {
-        throw new Error(`The user with ID ${u_id} does not exist`);
-      }
-
-      const userData = await ctx.stub.getState(u_id);
-      const userProfile = JSON.parse(userData.toString());
-
-      return JSON.stringify(userProfile);
-    } catch (error) {
-      console.error("An error occurred:", error.message);
-      throw error;
+    async GenericFunction2(ctx) {
+        const validUser = await checkABAC2(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
     }
-  }
 
-  async GetMyProfileAssistantDoctor(ctx, user_id) {
-    try {
-      const validUser = await checkAsstDoctorRole(ctx.stub);
-
-      if (!validUser) {
-        throw new Error("Access denied. Insufficient permissions.");
-      }
-
-      const userExists = await this.UserExists(ctx, user_id);
-      if (!userExists) {
-        throw new Error(`The user with ID ${user_id} does not exist`);
-      }
-
-      const userData = await ctx.stub.getState(user_id);
-      const userProfile = JSON.parse(userData.toString());
-
-      return JSON.stringify(userProfile);
-    } catch (error) {
-      console.error("An error occurred:", error.message);
-      throw error;
+    async GenericFunction3(ctx) {
+        const validUser = await checkABAC3(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
     }
-  }
 
-  async UserExists(ctx, u_id) {
-    const record = await ctx.stub.getState(u_id);
-    if (!record || record.length === 0) {
-      console.error(`User with ID ${u_id} not found.`);
-      return false;
+    async GenericFunction4(ctx) {
+        const validUser = await checkABAC4(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
     }
-    console.info(`User with ID ${u_id} exists.`);
-    return true;
-  }
+
+    async GenericFunction5(ctx) {
+        const validUser = await checkABAC5(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
+    }
+
+    async GenericFunction6(ctx) {
+        const validUser = await checkABAC6(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
+    }
+
+    async GenericFunction7(ctx) {
+        const validUser = await checkABAC7(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
+    }
+
+    async GenericFunction8(ctx) {
+        const validUser = await checkABAC8(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
+    }
+
+    async GenericFunction9(ctx) {
+        const validUser = await checkABAC9(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
+    }
+
+    async GenericFunction10(ctx) {
+        const validUser = await checkABAC10(ctx);
+        if (!validUser) {
+            throw new Error("Access denied. Insufficient permissions.");
+        }
+        return await this.GetHospitalData(ctx, "hsp1");
+    }
+
+    async GetHospitalData(ctx, h_id) {
+        const hospitalData = await ctx.stub.getState(h_id);
+        if (!hospitalData || hospitalData.length === 0) {
+            throw new Error(`The hospital with ID ${h_id} does not exist`);
+        }
+
+        return hospitalData.toString();
+    }
 }
 
 module.exports = EHRContract;
